@@ -13,5 +13,8 @@ include_directories(include)
 
 add_executable(detector
     src/main.cpp
+    src/sift.cpp
+    # src/surf.cpp
+    src/metrics.cpp
 )
 target_link_libraries(detector ${OpenCV_LIBS})
