@@ -11,7 +11,6 @@ SURFExtractor::SURFExtractor(
     bool extended,
     bool upright
 ) : extractionTime_(0.0), keypointCount_(0) {
-    
     surf_ = cv::xfeatures2d::SURF::create(
         hessianThreshold,
         nOctaves,
@@ -38,7 +37,7 @@ void SURFExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key
     
     // End timing
     auto end = std::chrono::high_resolution_clock::now();
-    extractionTime_ = std::chrono::duration<double, std::milli>(end - start).count();
+    extractionTime_ = std::chrono::duration<double>(end - start).count();
     keypointCount_ = static_cast<int>(keypoints.size());
 }
 

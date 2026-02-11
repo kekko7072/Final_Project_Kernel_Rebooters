@@ -12,9 +12,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(include)
 
 add_executable(detector
-    src/main.cpp
+    # src/main.cpp
     src/sift.cpp
     # src/surf.cpp
+    src/orb.cpp
     src/metrics.cpp
 )
 target_link_libraries(detector ${OpenCV_LIBS})

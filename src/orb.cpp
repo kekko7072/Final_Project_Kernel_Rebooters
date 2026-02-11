@@ -1,40 +1,45 @@
 // Author: Marco Carraro
 
-#include "sift.h"
+#include "orb.h"
 #include <chrono>
 #include <iostream>
 
-SIFTExtractor::SIFTExtractor(
+ORBExtractor::ORBExtractor(
     int nfeatures,
-    int nOctaveLayers,
-    double contrastThreshold,
-    double edgeThreshold,
-    double sigma
+    float scaleFactor,
+    int nlevels,
+    int edgeThreshold,
+    int firstLevel,
+    int WTA_K,
+    int patchSize
 ) : extractionTime_(0.0), keypointCount_(0) {
-    sift_ = cv::SIFT::create(
+    orb_ = cv::ORB::create(
         nfeatures,
-        nOctaveLayers,
-        contrastThreshold,
+        scaleFactor,
+        nlevels,
         edgeThreshold,
-        sigma
+        firstLevel,
+        WTA_K,
+        cv::ORB::HARRIS_SCORE,
+        patchSize
     );
 }
 
-void SIFTExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors){
+void ORBExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors){
     // Check if the input image is empty
     if (image.empty()) {
-        std::cerr << "[SIFT ERROR] Input image is empty!" << std::endl;
+        std::cerr << "[ORB ERROR] Input image is empty!" << std::endl;
         extractionTime_ = 0.0;
         keypointCount_ = 0;
         return;
     }
-
+    
     // Start timing
     auto start = std::chrono::high_resolution_clock::now();
-
-    // Extract SIFT features
-    sift_->detectAndCompute(image, cv::noArray(), keypoints, descriptors);
-
+    
+    // Extract ORB features
+    orb_->detectAndCompute(image, cv::noArray(), keypoints, descriptors);
+    
     // End timing
     auto end = std::chrono::high_resolution_clock::now();
     extractionTime_ = std::chrono::duration<double>(end - start).count();
@@ -42,11 +47,11 @@ void SIFTExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &key
 }
 
 // Get the time taken for the last extraction
-double SIFTExtractor::getExtractionTime() const {
+double ORBExtractor::getExtractionTime() const {
     return extractionTime_;
 }
 
 // Get the number of keypoints detected in the last extraction
-int SIFTExtractor::getKeypointCount() const {
+int ORBExtractor::getKeypointCount() const {
     return keypointCount_;
 }
