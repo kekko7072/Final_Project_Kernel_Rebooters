@@ -1,9 +1,11 @@
 // Author: Luca Pellegrini
 #include "flower_image.hpp"
 
-FlowerImage::FlowerImage(cv::Mat img_color, cv::Mat img_gray, std::string name,
-                         FlowerType f_type, bool healthy, int i_type) :
-    m_image_color{img_color}, m_image_grayscale{img_gray}, name{name}, flower_type{f_type}, healthy{healthy}, image_type{i_type}
+FlowerImage::FlowerImage(
+    std::string name, FlowerType fl_type, bool healthy, int img_type,
+    cv::Mat img_color, cv::Mat img_gray) :
+    name{name}, flower_type{fl_type}, healthy{healthy}, image_type{img_type},
+    m_image_color{img_color}, m_image_grayscale{img_gray}
 {}
 
 const cv::Mat &FlowerImage::getImageColor() const

@@ -1,7 +1,22 @@
 // Author: Luca Pellegrini
 #include "flower_image_container.hpp"
 
-FlowerImageContainer::FlowerImageContainer() {}
+#include <iostream>
+using std::cout;
+using std::endl;
+
+FlowerImageContainer::FlowerImageContainer()
+{
+    using Flt = FlowerType;
+    m_map_flower_type_indices = {
+        {Flt::Daisy, {}},
+        {Flt::Dandelion, {}},
+        {Flt::Rose, {}},
+        {Flt::Sunflower, {}},
+        {Flt::Tulip, {}},
+        {Flt::NoFlower, {}}
+    };
+}
 
 const std::vector<FlowerImage>& FlowerImageContainer::getImagesVector() const
 {
@@ -33,8 +48,10 @@ size_t FlowerImageContainer::size() const
 
 void FlowerImageContainer::push_back(const FlowerImage& img)
 {
-    const FlowerType flower_type {img.flower_type};
+    //cout << "push_back image: " << img.name << endl;
+    //cout << "        fl_type: " << static_cast<int>(img.flower_type) << endl;
     m_vec.push_back(img);
-    m_map_flower_type_indices.at(flower_type).push_back(m_vec.size()-1);
+    std::vector<size_t>& indices_vec {m_map_flower_type_indices.at(img.flower_type)};
+    indices_vec.push_back(m_vec.size()-1);
 }
 

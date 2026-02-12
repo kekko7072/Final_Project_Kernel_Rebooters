@@ -47,25 +47,22 @@ int main(int argc, char *argv[])
     bool test_dir {false};
     bool train_healthy_dir {false};
     bool train_diseased_dir {false};
-    if (fs::exists(data_path))
+    if (fs::exists(data_path) && fs::is_directory(data_path))
     {
-        if (fs::is_directory(data_path))
+        fs::directory_iterator iterator {data_path, fs::directory_options::skip_permission_denied};
+        //cout << "Found directories:" << endl;  // DEBUG
+        for (const auto& dir_entry : iterator)
         {
-            cout << "Found directories:" << endl;  // DEBUG
-            fs::directory_iterator iterator {data_path, fs::directory_options::skip_permission_denied};
-            for (const auto& dir_entry : iterator)
+            if (fs::is_directory(dir_entry))
             {
-                if (fs::is_directory(dir_entry))
-                {
-                    std::string s {dir_entry.path().filename()};
-                    cout << s << endl;  // DEBUG
-                    if (s == "test_photos")
-                        test_dir = true;
-                    if (s == "train_healthy_photos")
-                        train_healthy_dir = true;
-                    if (s == "train_diseased_photos")
-                        train_diseased_dir = true;
-                }
+                const std::string s {dir_entry.path().filename()};
+                //cout << s << endl;  // DEBUG
+                if (s == "test_photos")
+                    test_dir = true;
+                if (s == "train_healthy_photos")
+                    train_healthy_dir = true;
+                if (s == "train_diseased_photos")
+                    train_diseased_dir = true;
             }
         }
     }
@@ -88,6 +85,11 @@ int main(int argc, char *argv[])
 
 //    CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
     if (!loadImages(data_path, test_images, train_healthy_images, train_diseased_images))
+    {
+        cerr << "Error loading images. Aborting." << endl;
+        return 1;
+    }
+    cout << "Images loaded successfully!" << endl;
 
     return 0;
 }

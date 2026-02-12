@@ -10,8 +10,8 @@
 class FlowerImage
 {
 public:
-    FlowerImage(cv::Mat img_color, cv::Mat img_gray, std::string name,
-                FlowerType f_type, bool healthy, int i_type);
+    FlowerImage(std::string name, FlowerType fl_type, bool healthy, int img_type,
+                cv::Mat img_color, cv::Mat img_gray);
 
     const cv::Mat& getImageColor() const;
     cv::Mat& getImageColor();

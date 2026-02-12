@@ -3,7 +3,6 @@
 #define PREPROCESSING_HPP
 
 #include <filesystem>
-#include <vector>
 
 #include <flower_type.hpp>
 #include <flower_image.hpp>
@@ -23,5 +22,14 @@ bool loadImages(
     FlowerImageContainer& train_healthy_imgs,
     FlowerImageContainer& train_diseased_imgs
 );
+
+bool loadImagesFromDataset(
+    const std::filesystem::path& dir_path,
+    const bool healthy,
+    const int image_type,
+    FlowerImageContainer& imgs
+);
+
+bool isImage(const std::filesystem::path& file_path);
 
 #endif // PREPROCESSING_HPP
