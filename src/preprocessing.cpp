@@ -1,7 +1,17 @@
 // Author: Luca Pellegrini
 #include <preprocessing.hpp>
 
-bool load_images(std::vector<FlowerImage> test_imgs, std::vector<FlowerImage> train_healthy_imgs, std::vector<FlowerImage> train_diseased_imgs)
+#include <filesystem>
+#include <flower_image_container.hpp>
+
+namespace fs = std::filesystem;
+
+bool loadImages(
+    const fs::path& data_path,
+    FlowerImageContainer& test_imgs,
+    FlowerImageContainer& train_healthy_imgs,
+    FlowerImageContainer& train_diseased_imgs
+)
 {
     return true;
 }

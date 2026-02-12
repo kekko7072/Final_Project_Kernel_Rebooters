@@ -8,6 +8,7 @@
 
 #include <flower_type.hpp>
 #include <flower_image.hpp>
+#include <flower_image_container.hpp>
 #include <preprocessing.hpp>
 
 namespace fs = std::filesystem;
@@ -81,11 +82,12 @@ int main(int argc, char *argv[])
     cout << "Valid path. Loading images..." << endl;
 
     // Load images
-    std::vector<FlowerImage> test_images;
-    std::vector<FlowerImage> train_healthy_images;
-    std::vector<FlowerImage> train_diseased_images;
+    FlowerImageContainer test_images;
+    FlowerImageContainer train_healthy_images;
+    FlowerImageContainer train_diseased_images;
 
 //    CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
+    if (!loadImages(data_path, test_images, train_healthy_images, train_diseased_images))
 
     return 0;
 }
