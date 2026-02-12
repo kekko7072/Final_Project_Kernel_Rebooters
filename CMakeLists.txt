@@ -11,7 +11,13 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(include)
 
-add_executable(detector
+set(HEADER_FILES include/flower_image.hpp include/flower_image_container.hpp include/flower_type.hpp include/preprocessing.hpp)
+add_executable(flower_classifier
     src/main.cpp
+    src/flower_image.cpp
+    src/flower_image_container.cpp
+    src/preprocessing.cpp
+    ${HEADER_FILES}
 )
-target_link_libraries(detector ${OpenCV_LIBS})
+target_include_directories(flower_classifier PRIVATE include)
+target_link_libraries(flower_classifier ${OpenCV_LIBS})

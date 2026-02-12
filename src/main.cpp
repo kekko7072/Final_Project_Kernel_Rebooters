@@ -1,9 +1,15 @@
 #include <iostream>
 #include <filesystem>
+#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+
+#include <flower_type.hpp>
+#include <flower_image.hpp>
+#include <flower_image_container.hpp>
+#include <preprocessing.hpp>
 
 namespace fs = std::filesystem;
 using std::cout;
@@ -13,23 +19,77 @@ using std::endl;
 int main(int argc, char *argv[])
 {
     // Preprocessing --> Luca
-    import_images();          // Import the test images of the chosen flower type
-    extract_descriptors();    // Extract global and local descriptor from the test image
 
-    // Processing
-    for each test_image :
-        sift(); // Marco          // Compare the feature of the test image with the ones from the train folder using SIFT
-        surf(); // Marco          // Compare the feature of the test image with the ones from the train folder using SURF
-        tm();   // Luca           // Compare the feature of the test image with the ones from the train folder using template matching
-        hog();  // Francesco      // Compare the feature of the test image with the ones from the train folder using Histogram Orientation Gradient
-        bow();  // Francesco      // Compare the feature of the test image with the ones from the train folder using Bag Of Words
-        is_health();              // Check if the test flower is healthy or not (maybe looking at the colors of the flower?)
+    const std::string parser_keys {
+        "{help h ? | | print this message}"
+        "{@path    | | path of the train/test dataset}"
+    };
+    cv::CommandLineParser parser {argc, argv, parser_keys};
+    const std::string about_text {"flower_detector 0.1"};
+    parser.about(about_text);
 
-    // Performance measurement --> Marco
-    print_output();           // Display the image with a bounding box and a similarity score near it
-    total_acc();              // Calculate the entire test set to quantify the overall robustness of the system: Number of images correctly predicted / number of test images     
-    category_acc();           // Percentage of correct classification for each of the 5 categories: Number of images correctly predicted for a category / number of test images of that category
-    mean_processing_time();   // Average time required to classify an input image (maybe with pipobarra while processing the processing?)
+    if (parser.has("help"))
+    {
+        parser.printMessage();
+        return 0;
+    }
+
+    std::string data_path_str = parser.get<std::string>("@path");
+    if (data_path_str.empty())
+    {
+        cout << "No path to specified. Using default ('../Final_project_proposal/')" << endl;
+        data_path_str = "../Final_project_proposal/";
+    }
+
+    // Check that path exists and that it contains train/test datasets
+    fs::path data_path {data_path_str};
+    bool valid_path {false};
+    bool test_dir {false};
+    bool train_healthy_dir {false};
+    bool train_diseased_dir {false};
+    if (fs::exists(data_path) && fs::is_directory(data_path))
+    {
+        fs::directory_iterator iterator {data_path, fs::directory_options::skip_permission_denied};
+        //cout << "Found directories:" << endl;  // DEBUG
+        for (const auto& dir_entry : iterator)
+        {
+            if (fs::is_directory(dir_entry))
+            {
+                const std::string s {dir_entry.path().filename()};
+                //cout << s << endl;  // DEBUG
+                if (s == "test_photos")
+                    test_dir = true;
+                if (s == "train_healthy_photos")
+                    train_healthy_dir = true;
+                if (s == "train_diseased_photos")
+                    train_diseased_dir = true;
+            }
+        }
+    }
+    if (test_dir && train_healthy_dir && train_diseased_dir)
+    {
+        valid_path = true;
+    }
+    if (!valid_path)
+    {
+        CV_Error(cv::Error::StsBadArg, "Invalid path, no dataset found!");
+    }
+
+    // DEBUG
+    cout << "Valid path. Loading images..." << endl;
+
+    // Load images
+    FlowerImageContainer test_images;
+    FlowerImageContainer train_healthy_images;
+    FlowerImageContainer train_diseased_images;
+
+//    CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
+    if (!loadImages(data_path, test_images, train_healthy_images, train_diseased_images))
+    {
+        cerr << "Error loading images. Aborting." << endl;
+        return 1;
+    }
+    cout << "Images loaded successfully!" << endl;
 
     return 0;
 }
