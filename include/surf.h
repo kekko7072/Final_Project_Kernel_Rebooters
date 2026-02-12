@@ -26,10 +26,24 @@ class SURFExtractor {
         // Get the number of keypoints detected in the last extraction
         int getKeypointCount() const;
 
+        // Match descriptors between two sets of keypoints
+        int matchDescriptors(const cv::Mat &descriptors1, const cv::Mat &descriptors2, std::vector<cv::DMatch> &matches);
+
+        // Filter matches keeping only those with a distance less than a specified threshold
+        std::vector<cv::DMatch> filterMatches(const std::vector<cv::DMatch> &matches, double threshold = 2.0);
+
+        // Match descriptors and filter matches in one step
+        int matchAndFilter(const cv::Mat &descriptors1, const cv::Mat &descriptors2, std::vector<cv::DMatch> &goodMatches, double threshold = 2.0);
+
+        // Get the time taken for the last matching operation
+        double getMatchingTime() const;
+
     private:
         cv::Ptr<cv::xfeatures2d::SURF> surf_;
+        cv::Ptr<cv::BFMatcher> matcher_;
         double extractionTime_;
         int keypointCount_;
+        double matchingTime_;
 };
 
 #endif // SURF_H
