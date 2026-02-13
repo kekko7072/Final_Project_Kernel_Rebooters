@@ -3,6 +3,8 @@
 #ifndef SURF_H
 #define SURF_H
 
+#ifdef ENABLE_SURF
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <vector>
@@ -46,4 +48,5 @@ class SURFExtractor {
         double matchingTime_;
 };
 
+#endif // ENABLE_SURF
 #endif // SURF_H

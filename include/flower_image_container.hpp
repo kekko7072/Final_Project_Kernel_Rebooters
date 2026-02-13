@@ -40,6 +40,9 @@ public:
      */
     size_t size() const;
 
+    FlowerImage& at(const size_t i);
+    const FlowerImage& at(const size_t i) const;
+
     void push_back(const FlowerImage& img);
 
 private:
