@@ -17,6 +17,10 @@ add_executable(flower_classifier
     src/flower_image.cpp
     src/flower_image_container.cpp
     src/preprocessing.cpp
+    src/sift.cpp
+    src/surf.cpp
+    src/orb.cpp
+    src/metrics.cpp
     ${HEADER_FILES}
 )
 target_include_directories(flower_classifier PRIVATE include)
