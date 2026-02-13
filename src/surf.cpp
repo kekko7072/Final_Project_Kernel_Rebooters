@@ -1,5 +1,7 @@
 // Author: Marco Carraro
 
+#ifdef ENABLE_SURF
+
 #include "surf.h"
 #include <chrono>
 #include <iostream>
@@ -118,3 +120,5 @@ int SURFExtractor::getKeypointCount() const {
 double SURFExtractor::getMatchingTime() const {
     return matchingTime_;
 }
+
+#endif // ENABLE_SURF
