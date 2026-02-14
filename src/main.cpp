@@ -1,6 +1,5 @@
 #include <iostream>
 #include <filesystem>
-#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -10,6 +9,7 @@
 #include <flower_image.hpp>
 #include <flower_image_container.hpp>
 #include <preprocessing.hpp>
+#include <matching.h>
 
 namespace fs = std::filesystem;
 using std::cout;
@@ -90,6 +90,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     cout << "Images loaded successfully!" << endl;
+
+    hog(test_images, train_healthy_images, train_diseased_images);
+    bow(test_images, train_healthy_images, train_diseased_images);
 
     return 0;
 }
