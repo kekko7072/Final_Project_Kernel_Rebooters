@@ -21,3 +21,21 @@ To efficiently tackle the project, we divided the work into the following compon
     - accuracy per category
 - Confusion matrix
 - Mean processing time
+
+## Compile (Command Line)
+Recommended (CMake):
+```bash
+cmake -S . -B build
+cmake --build build -j4
+```
+
+Alternative (single command with OpenCV via pkg-config):
+```bash
+g++ -std=c++17 src/*.cpp -Iinclude $(pkg-config --cflags --libs opencv4) -o flower_classifier
+g++ -std=c++17 src/*.cpp -Iinclude $(pkg-config --cflags --libs opencv) -o flower_classifier
+```
+
+## Run
+```bash
+./build/flower_classifier Final_project_proposal
+```
