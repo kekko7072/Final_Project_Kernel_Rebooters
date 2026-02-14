@@ -25,6 +25,8 @@ set(HEADER_FILES
     include/metrics.h
     include/orb.h
     include/sift.h
+    include/hog.h
+    include/bow.h
 )
 set(SOURCE_FILES
     src/main.cpp
@@ -33,6 +35,8 @@ set(SOURCE_FILES
     src/preprocessing.cpp
     src/sift.cpp
     src/orb.cpp
+    src/hog.cpp
+    src/bow.cpp
     src/metrics.cpp
 )
 if(CONFIG_ENABLE_SURF)
