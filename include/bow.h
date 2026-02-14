@@ -22,22 +22,11 @@ class BoWExtractor {
         // Extract BoW histogram from one image
         bool extract(const cv::Mat &image, cv::Mat &histogram);
 
-        // Get the time taken for the last extraction
-        double getExtractionTime() const;
-
-        // Get the number of keypoints from the last extraction
-        int getKeypointCount() const;
-
         // Compute distance between 2 BoW histograms
-        double matchDescriptors(const cv::Mat &histogram1, const cv::Mat &histogram2);
-
-        // Get the time taken for the last matching operation
-        double getMatchingTime() const;
-
-        bool isVocabularyReady() const;
+        double matchDescriptors(const cv::Mat &histogram1, const cv::Mat &histogram2) const;
 
     private:
-        bool computeORBDescriptors(const cv::Mat &image, cv::Mat &descriptors, int &keypointCount);
+        bool computeORBDescriptors(const cv::Mat &image, cv::Mat &descriptors) const;
         cv::Mat computeHistogram(const cv::Mat &descriptors) const;
 
         cv::Ptr<cv::ORB> orb_;
@@ -45,9 +34,6 @@ class BoWExtractor {
         int vocabularySize_;
         int maxIterations_;
         int attempts_;
-        double extractionTime_;
-        int keypointCount_;
-        double matchingTime_;
 };
 
 #endif // BOW_H

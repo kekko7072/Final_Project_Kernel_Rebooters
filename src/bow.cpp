@@ -1,8 +1,6 @@
 // Author: Francesco Vezzani
 
 #include "bow.h"
-#include <chrono>
-#include <iostream>
 #include <limits>
 
 BoWExtractor::BoWExtractor(
@@ -13,15 +11,10 @@ BoWExtractor::BoWExtractor(
 ) : vocabularySize_(vocabularySize),
     maxIterations_(maxIterations),
     attempts_(attempts),
-    extractionTime_(0.0),
-    keypointCount_(0),
-    matchingTime_(0.0) {
-    orb_ = cv::ORB::create(nfeatures);
-}
+    orb_(cv::ORB::create(nfeatures)) {}
 
-bool BoWExtractor::computeORBDescriptors(const cv::Mat &image, cv::Mat &descriptors, int &keypointCount){
+bool BoWExtractor::computeORBDescriptors(const cv::Mat &image, cv::Mat &descriptors) const{
     if (image.empty()) {
-        keypointCount = 0;
         return false;
     }
 
@@ -34,7 +27,6 @@ bool BoWExtractor::computeORBDescriptors(const cv::Mat &image, cv::Mat &descript
 
     std::vector<cv::KeyPoint> keypoints;
     orb_->detectAndCompute(gray, cv::noArray(), keypoints, descriptors);
-    keypointCount = static_cast<int>(keypoints.size());
 
     return !descriptors.empty();
 }
@@ -44,8 +36,7 @@ bool BoWExtractor::buildVocabulary(const std::vector<cv::Mat> &trainImages){
 
     for (const cv::Mat &image : trainImages) {
         cv::Mat descriptors;
-        int keypointCount = 0;
-        if (!computeORBDescriptors(image, descriptors, keypointCount)) {
+        if (!computeORBDescriptors(image, descriptors)) {
             continue;
         }
 
@@ -55,7 +46,6 @@ bool BoWExtractor::buildVocabulary(const std::vector<cv::Mat> &trainImages){
     }
 
     if (vocabularySize_ <= 0 || allDescriptors.rows < vocabularySize_) {
-        std::cerr << "[BOW ERROR] Not enough descriptors to build vocabulary!" << std::endl;
         vocabulary_.release();
         return false;
     }
@@ -110,59 +100,26 @@ cv::Mat BoWExtractor::computeHistogram(const cv::Mat &descriptors) const{
 
 bool BoWExtractor::extract(const cv::Mat &image, cv::Mat &histogram){
     if (vocabulary_.empty()) {
-        std::cerr << "[BOW ERROR] Vocabulary not built yet!" << std::endl;
-        extractionTime_ = 0.0;
-        keypointCount_ = 0;
         histogram.release();
         return false;
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
-
     cv::Mat descriptors;
-    if (!computeORBDescriptors(image, descriptors, keypointCount_)) {
-        extractionTime_ = 0.0;
+    if (!computeORBDescriptors(image, descriptors)) {
         histogram.release();
         return false;
     }
 
     histogram = computeHistogram(descriptors);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    extractionTime_ = std::chrono::duration<double>(end - start).count();
-
     return !histogram.empty();
 }
 
-double BoWExtractor::matchDescriptors(const cv::Mat &histogram1, const cv::Mat &histogram2){
-    if (histogram1.empty() || histogram2.empty() || histogram1.cols != histogram2.cols) {
-        std::cerr << "[BOW ERROR] Invalid histograms for matching!" << std::endl;
-        matchingTime_ = 0.0;
+double BoWExtractor::matchDescriptors(const cv::Mat &histogram1, const cv::Mat &histogram2) const{
+    if (histogram1.empty() || histogram2.empty() ||
+        histogram1.rows != histogram2.rows || histogram1.cols != histogram2.cols) {
         return std::numeric_limits<double>::max();
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
-
-    const double distance = cv::norm(histogram1, histogram2, cv::NORM_L2);
-
-    auto end = std::chrono::high_resolution_clock::now();
-    matchingTime_ = std::chrono::duration<double, std::milli>(end - start).count();
-
-    return distance;
-}
-
-double BoWExtractor::getExtractionTime() const {
-    return extractionTime_;
-}
-
-int BoWExtractor::getKeypointCount() const {
-    return keypointCount_;
-}
-
-double BoWExtractor::getMatchingTime() const {
-    return matchingTime_;
-}
-
-bool BoWExtractor::isVocabularyReady() const {
-    return !vocabulary_.empty();
+    return cv::norm(histogram1, histogram2, cv::NORM_L2);
 }

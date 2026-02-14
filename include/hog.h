@@ -18,25 +18,13 @@ class HOGExtractor {
         );
 
         // Extract HOG descriptors from the input image
-        void extract(const cv::Mat &image, std::vector<float> &descriptors);
-
-        // Get the time taken for the last extraction
-        double getExtractionTime() const;
-
-        // Get descriptor size from the last extraction
-        int getDescriptorCount() const;
+        bool extract(const cv::Mat &image, std::vector<float> &descriptors);
 
         // Compute L2 distance between 2 HOG descriptor vectors
-        double matchDescriptors(const std::vector<float> &descriptors1, const std::vector<float> &descriptors2);
-
-        // Get the time taken for the last matching operation
-        double getMatchingTime() const;
+        double matchDescriptors(const std::vector<float> &descriptors1, const std::vector<float> &descriptors2) const;
 
     private:
         cv::HOGDescriptor hog_;
-        double extractionTime_;
-        int descriptorCount_;
-        double matchingTime_;
 };
 
 #endif // HOG_H
