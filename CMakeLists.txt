@@ -25,6 +25,8 @@ set(HEADER_FILES
     include/metrics.h
     include/orb.h
     include/sift.h
+    include/sift_processing.h
+    include/print_stats.h
 )
 set(SOURCE_FILES
     src/main.cpp
@@ -34,6 +36,8 @@ set(SOURCE_FILES
     src/sift.cpp
     src/orb.cpp
     src/metrics.cpp
+    src/sift_processing.cpp
+    src/print_stats.cpp
 )
 if(CONFIG_ENABLE_SURF)
     set(HEADER_FILES

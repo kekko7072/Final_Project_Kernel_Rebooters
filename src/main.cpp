@@ -11,6 +11,11 @@
 #include <flower_image_container.hpp>
 #include <preprocessing.hpp>
 
+#include "sift.h"
+#include "sift_processing.h"
+#include "print_stats.h"
+#include "metrics.h"
+
 namespace fs = std::filesystem;
 using std::cout;
 using std::cerr;
@@ -83,13 +88,33 @@ int main(int argc, char *argv[])
     FlowerImageContainer train_healthy_images;
     FlowerImageContainer train_diseased_images;
 
-//    CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
+    // CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
     if (!loadImages(data_path, test_images, train_healthy_images, train_diseased_images))
     {
         cerr << "Error loading images. Aborting." << endl;
         return 1;
     }
     cout << "Images loaded successfully!" << endl;
+
+    // Processing - SIFT --> Marco
+
+    SIFTExtractor sift;
+
+    Metrics sift_metrics = createMetrics(6);
+
+    std::map<FlowerType, cv::Mat> train_descriptors;
+
+    const std::vector<std::string> class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"};
+    
+    // Train SIFT
+    trainSIFT(train_healthy_images, train_diseased_images, sift, train_descriptors, class_names, true);
+    
+    // Test SIFT
+    double threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
+    testSIFT(test_images, train_descriptors, sift, sift_metrics, class_names, threshold, true);
+    
+    // Display results
+    printClassificationReport(sift_metrics, class_names, "SIFT");
 
     return 0;
 }
