@@ -43,10 +43,12 @@ if(CONFIG_ENABLE_SURF)
     set(HEADER_FILES
         ${HEADER_FILES}
         include/surf.h
+        include/surf_processing.h
     )
     set(SOURCE_FILES
         ${SOURCE_FILES}
         src/surf.cpp
+        src/surf_processing.cpp
     )
 endif()
 add_executable(flower_classifier
