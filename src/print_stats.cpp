@@ -32,7 +32,9 @@ void printConfusionMatrix(
 
 void printTimingStats(const Metrics& metrics){
     cout << "\nTiming Statistics:" << endl;
-    cout << "Mean: " << std::fixed << std::setprecision(2) << meanProcessingTime(metrics) << " ms" << endl;
+    cout << "Total: " << std::fixed << std::setprecision(2) << (totalProcessingTime(metrics) / 1000.0) << " s (" 
+                                                            << (totalProcessingTime(metrics) / 60000.0) << " minutes)" << endl;
+    cout << "Mean: " << meanProcessingTime(metrics) << " ms" << endl;
     cout << "Min: " << minProcessingTime(metrics) << " ms" << endl;
     cout << "Max: " << maxProcessingTime(metrics) << " ms" << endl;
 }

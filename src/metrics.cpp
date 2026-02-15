@@ -1,6 +1,7 @@
 // Author: Marco Carraro
 
 #include "metrics.h"
+#include <numeric>  
 
 // Initialize metrics structure
 Metrics createMetrics(int num_classes){
@@ -129,4 +130,12 @@ double maxProcessingTime(const Metrics &metrics){
     }
     
     return max_time;
+}
+
+// Calculate total processing time (sum of all individual times)
+double totalProcessingTime(const Metrics &metrics){
+    if (metrics.processing_times.empty()) 
+        return 0.0;
+    else
+        return std::accumulate(metrics.processing_times.begin(), metrics.processing_times.end(), 0.0);
 }
