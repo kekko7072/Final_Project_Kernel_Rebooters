@@ -1,6 +1,5 @@
 #include <iostream>
 #include <filesystem>
-#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -10,6 +9,7 @@
 #include <flower_image.hpp>
 #include <flower_image_container.hpp>
 #include <preprocessing.hpp>
+#include <matching.h>
 
 #include "sift.h"
 #include "sift_processing.h"
@@ -148,5 +148,14 @@ int main(int argc, char *argv[])
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
     
+  
+    // Processing - HOG --> Francesco
+  
+    hog(test_images, train_healthy_images, train_diseased_images);
+  
+    // Processing - BOW --> Francesco
+  
+    bow(test_images, train_healthy_images, train_diseased_images);
+
     return 0;
 }

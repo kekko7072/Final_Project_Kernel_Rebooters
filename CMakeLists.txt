@@ -25,6 +25,9 @@ set(HEADER_FILES
     include/metrics.h
     include/orb.h
     include/sift.h
+    include/hog.h
+    include/bow.h
+    include/matching.h
     include/sift_processing.h
     include/print_stats.h
 )
@@ -35,6 +38,9 @@ set(SOURCE_FILES
     src/preprocessing.cpp
     src/sift.cpp
     src/orb.cpp
+    src/hog.cpp
+    src/bow.cpp
+    src/matching.cpp
     src/metrics.cpp
     src/sift_processing.cpp
     src/print_stats.cpp

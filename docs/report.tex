@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{xurl}
+\usepackage{url}
 \usepackage[breaklinks=true]{hyperref}
 \usepackage{geometry}
 \usepackage{amsmath}
@@ -23,12 +23,206 @@
 	\maketitle
 	
 	\section{Introduction}
+	The overall goal of this project is to build a complete computer vision pipeline that can
+	classify flower images and support further analysis tasks, such as health-state estimation
+	and performance evaluation. In practical terms, the system is designed around a clear
+	workflow: images are loaded from a structured dataset, visual descriptors are extracted,
+	test images are compared against training references, and final predictions are produced.
+
+	This report remains a shared team document, so section titles for all project components
+	are kept even when implementation details are still pending. The current revision documents
+	the HOG and BoW modules according to their latest simplified implementation: both modules
+	now expose compact extractor interfaces focused only on feature extraction, vocabulary
+	creation (for BoW), and descriptor matching.
+
+	\section{Preprocessing}
+	\textit{TODO}
+
+	\section{SIFT}
+	\textit{TODO}
+
+	\section{SURF}
+	\textit{TODO}
+
+	\section{ORB}
+	\textit{TODO}
+
+	\section{Template Matching}
+	\textit{TODO}
+
+	\section{HOG}
+	\subsection{Objective}
+	The HOG branch was introduced to add a global shape-and-gradient based descriptor that is
+	easy to interpret and relatively stable in many real-world image conditions. The idea is
+	simple: each test image is converted into one feature vector, then compared with feature
+	vectors extracted from training images. The predicted class is taken from the nearest
+	training sample.
+
+	From an engineering perspective, the objective was not to create a heavily optimized model,
+	but to produce a transparent baseline that is easy to debug, easy to validate, and fully
+	consistent with the project architecture.
+
+	\subsection{Code Structure Decision}
+	HOG logic is split into:
+	\begin{itemize}
+		\item \texttt{HOGExtractor} (\texttt{include/hog.h}, \texttt{src/hog.cpp}) for low-level feature extraction and distance computation.
+		\item \texttt{hog(...)} wrapper (\texttt{src/matching.cpp}) for dataset-level loop and prediction print.
+	\end{itemize}
 	
+	This separation is important because it keeps responsibilities clean:
+	\texttt{HOGExtractor} handles only algorithmic operations, while \texttt{hog(...)} handles
+	dataset traversal and prediction flow. As a result, \texttt{main.cpp} remains focused on
+	orchestration, and the module can be reused or replaced with minimal impact on the rest
+	of the system.
+
+	In the current version, \texttt{HOGExtractor} was simplified to a minimal API:
+	\texttt{extract(...)} returns \texttt{bool} and \texttt{matchDescriptors(...)} returns the
+	L2 distance. Timing fields and related getters were removed because they were not used by
+	the application flow.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input image is converted to grayscale if needed.
+		\item The image is resized to a fixed window (\texttt{64x128}).
+		\item HOG parameters are basic OpenCV defaults: block size \texttt{16x16}, block stride \texttt{8x8}, cell size \texttt{8x8}, 9 bins.
+	\end{itemize}
+	
+	The fixed resize step is a key practical decision: HOG vectors can only be compared
+	directly when they share the same dimensionality. Using a fixed window gives deterministic
+	descriptor length and avoids shape-dependent edge cases in matching.
+	
+	\subsection{Matching Choices}
+	\begin{itemize}
+		\item For each test descriptor, all train descriptors are scanned.
+		\item Similarity score is Euclidean distance (L2).
+		\item Predicted label is the train sample with minimum distance.
+	\end{itemize}
+	
+	This results in a straightforward nearest-neighbor baseline:
+	\[
+	\hat{y}(x) = \arg\min_{i} \lVert h(x) - h(x_i^{train}) \rVert_2
+	\]
+	where \(h(\cdot)\) is the HOG descriptor.
+
+	The benefit of this choice is interpretability: every prediction can be traced back to one
+	specific training sample and one explicit distance value, which is very useful during
+	qualitative inspection.
+	
+	\subsection{Robustness Choices}
+	\begin{itemize}
+		\item Empty input image check in \texttt{extract(...)}.
+		\item Empty or incompatible descriptor check before matching.
+		\item Sample is skipped by the wrapper when \texttt{extract(...)} returns \texttt{false}.
+	\end{itemize}
+	
+	\subsection{Trade-off}
+	The implementation is intentionally simple and readable, but the exhaustive comparison
+	step has cost \(O(N_{test}\cdot N_{train})\). This is acceptable as a baseline and for
+	medium dataset sizes, but it is a known scalability limitation for larger datasets.
+
+	\section{BoW}
+	\subsection{Objective}
+	While HOG focuses on global gradient structure, BoW was introduced to capture local visual
+	patterns through keypoints. The goal is to convert a variable number of local ORB
+	descriptors into a fixed-size global representation, so images can be compared in a compact
+	and uniform way.
+
+	In other words, BoW bridges local detail and global matching: it keeps the discriminative
+	power of local descriptors but produces one standardized vector per image.
+
+	\subsection{Code Structure Decision}
+	BoW logic is split into:
+	\begin{itemize}
+		\item \texttt{BoWExtractor} (\texttt{include/bow.h}, \texttt{src/bow.cpp}) for vocabulary building, histogram extraction, and histogram distance.
+		\item \texttt{bow(...)} wrapper (\texttt{src/matching.cpp}) for train/test loop and prediction print.
+	\end{itemize}
+	
+	This separation follows the same architectural rule used across the project:
+	core algorithm in an extractor class, orchestration in a lightweight wrapper.
+	This improves readability and allows future experiments (different vocabularies,
+	different local features, different distance metrics) without touching application flow.
+
+	The current version also simplifies the BoW extractor interface to three public operations:
+	\texttt{buildVocabulary(...)}, \texttt{extract(...)}, and \texttt{matchDescriptors(...)}.
+	Unused timing/keypoint getter APIs were removed to keep the code shorter and easier to
+	maintain.
+
+	\subsection{Pipeline Choices}
+	The implemented BoW pipeline is:
+	\begin{enumerate}
+		\item extract ORB descriptors from all train images,
+		\item convert descriptors to \texttt{CV\_32F},
+		\item run k-means to build a visual vocabulary (default size: 20 words),
+		\item assign each descriptor to the closest visual word,
+		\item build one histogram per image and normalize it,
+		\item compare test and train histograms with L2 distance.
+	\end{enumerate}
+
+	This pipeline is intentionally classical and explicit. Every stage can be inspected
+	independently (descriptors, vocabulary, histogram), making debugging and incremental
+	improvement easier for the team.
+	
+	\subsection{Why ORB + K-means}
+	\begin{itemize}
+		\item ORB is already present in the project and is computationally light.
+		\item K-means gives a direct and standard way to form visual words.
+		\item Fixed vocabulary keeps the implementation deterministic and easy to tune.
+	\end{itemize}
+	
+	Choosing ORB also reduces integration friction, since ORB-based utilities were already
+	available and familiar in the codebase. K-means, despite being simple, provides a clear
+	semantic interpretation: each cluster center is treated as a visual word.
+	
+	\subsection{Histogram and Matching Formula}
+	Each image is represented by a normalized histogram \(b(x)\in R^K\), where \(K\)
+	is vocabulary size. Prediction follows:
+	\[
+	\hat{y}(x) = \arg\min_{i} \lVert b(x) - b(x_i^{train}) \rVert_2
+	\]
+	
+	Normalization reduces sensitivity to raw keypoint count differences between images,
+	so comparison focuses more on visual word distribution than on absolute descriptor count.
+	This is especially useful when images produce very different numbers of detected keypoints.
+
+	\subsection{Robustness Choices}
+	\begin{itemize}
+		\item Vocabulary availability check before extraction.
+		\item Empty descriptor/histogram checks.
+		\item Skip logic in \texttt{bow(...)} when \texttt{extract(...)} returns \texttt{false}.
+	\end{itemize}
+
+	\subsection{Trade-off}
+	The current implementation favors clarity over optimization:
+	\begin{itemize}
+		\item vocabulary is rebuilt at each run,
+		\item nearest-neighbor matching is exhaustive,
+		\item no TF-IDF or advanced scoring yet.
+	\end{itemize}
+
+	These trade-offs are deliberate at this stage: the code remains concise and easy to reason
+	about, and it provides a reliable baseline before introducing acceleration or more advanced
+	weighting schemes.
+
+	\section{Flower Health Detection}
+	\textit{Section reserved for flower health detection details (to be completed).}
+
+	\section{Performance Evaluation}
+	\textit{Section reserved for metrics, confusion matrix, and timing analysis (to be completed).}
+
+	\section{Conclusion}
+	In this iteration, HOG and BoW were integrated as simple and modular baselines.
+	The main design decision was to keep a consistent extractor interface and move
+	algorithm-level loops outside \texttt{main.cpp} into a dedicated matching module.
+	The latest revision further reduced complexity by removing unused state from HOG/BoW
+	extractors and retaining only the operations actually used by the pipeline.
 	
 	\section*{References / Links}
 	
 	\begin{itemize}
 		\item Project repository: \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}
+		\item OpenCV HOGDescriptor documentation: \url{https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html}
+		\item OpenCV ORB documentation: \url{https://docs.opencv.org/4.x/db/d95/classcv_1_1ORB.html}
+		\item OpenCV kmeans documentation: \url{https://docs.opencv.org/4.x/d1/d5c/tutorial_py_kmeans_opencv.html}
 	\end{itemize}
 	
 \end{document}

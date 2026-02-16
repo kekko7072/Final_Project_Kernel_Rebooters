@@ -21,3 +21,15 @@ To efficiently tackle the project, we divided the work into the following compon
     - accuracy per category
 - Confusion matrix
 - Mean processing time
+
+## Compile (Command Line)
+Recommended (CMake):
+```bash
+cmake -S . -B build
+cmake --build build -j4
+```
+
+## Run
+```bash
+./build/flower_classifier Final_project_proposal
+```
