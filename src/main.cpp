@@ -11,6 +11,16 @@
 #include <preprocessing.hpp>
 #include <matching.h>
 
+#include "sift.h"
+#include "sift_processing.h"
+#include "print_stats.h"
+#include "metrics.h"
+
+#ifdef ENABLE_SURF
+#include "surf.h"
+#include "surf_processing.h"
+#endif
+
 namespace fs = std::filesystem;
 using std::cout;
 using std::cerr;
@@ -83,7 +93,7 @@ int main(int argc, char *argv[])
     FlowerImageContainer train_healthy_images;
     FlowerImageContainer train_diseased_images;
 
-//    CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
+    // CV_Assert(load_images(test_images, train_healthy_images, train_diseased_images));
     if (!loadImages(data_path, test_images, train_healthy_images, train_diseased_images))
     {
         cerr << "Error loading images. Aborting." << endl;
@@ -91,7 +101,60 @@ int main(int argc, char *argv[])
     }
     cout << "Images loaded successfully!" << endl;
 
+    // Processing - SIFT --> Marco
+
+    SIFTExtractor sift;
+
+    Metrics sift_metrics = createMetrics(6);
+
+    std::map<FlowerType, cv::Mat> sift_train_descriptors;
+
+    const std::vector<std::string> class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"};
+    
+    // Train SIFT
+    trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
+    
+    // Test SIFT
+    double sift_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
+    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
+    
+    // Display results
+    printClassificationReport(sift_metrics, class_names, "SIFT");
+
+
+    // Processing - SURF --> Marco
+    
+    #ifdef ENABLE_SURF
+    {
+        cout << "\n\n====================\n" << endl;
+        
+        SURFExtractor surf;
+
+        Metrics surf_metrics = createMetrics(6);
+
+        std::map<FlowerType, cv::Mat> surf_train_descriptors;
+
+        // Train SURF
+        trainSURF(train_healthy_images, train_diseased_images, surf, surf_train_descriptors, class_names, true);
+        
+        // Test SURF
+        double surf_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
+        testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
+        
+        // Display results
+        printClassificationReport(surf_metrics, class_names, "SURF");
+    } 
+    #else
+        cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
+    #endif
+    
+  
+    // Processing - HOG --> Francesco
+  
     hog(test_images, train_healthy_images, train_diseased_images);
+  
+    // Processing - BOW --> Francesco
+  
     bow(test_images, train_healthy_images, train_diseased_images);
 
     return 0;

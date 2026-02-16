@@ -28,6 +28,8 @@ set(HEADER_FILES
     include/hog.h
     include/bow.h
     include/matching.h
+    include/sift_processing.h
+    include/print_stats.h
 )
 set(SOURCE_FILES
     src/main.cpp
@@ -40,15 +42,19 @@ set(SOURCE_FILES
     src/bow.cpp
     src/matching.cpp
     src/metrics.cpp
+    src/sift_processing.cpp
+    src/print_stats.cpp
 )
 if(CONFIG_ENABLE_SURF)
     set(HEADER_FILES
         ${HEADER_FILES}
         include/surf.h
+        include/surf_processing.h
     )
     set(SOURCE_FILES
         ${SOURCE_FILES}
         src/surf.cpp
+        src/surf_processing.cpp
     )
 endif()
 add_executable(flower_classifier

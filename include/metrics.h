@@ -53,4 +53,7 @@ double minProcessingTime(const Metrics &metrics);
 // Retrieve the maximum processing time
 double maxProcessingTime(const Metrics &metrics);
 
+// Calculate total processing time (sum of all individual times)
+double totalProcessingTime(const Metrics &metrics);
+
 #endif // METRICS_H
