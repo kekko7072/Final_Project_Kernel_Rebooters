@@ -42,7 +42,7 @@ class SURFExtractor {
 
     private:
         cv::Ptr<cv::xfeatures2d::SURF> surf_;
-        cv::Ptr<cv::BFMatcher> matcher_;
+        cv::Ptr<cv::DescriptorMatcher> matcher_;
         double extractionTime_;
         int keypointCount_;
         double matchingTime_;

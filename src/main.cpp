@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
     trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
     
     // Test SIFT
-    double threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
-    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, threshold, true);
+    double sift_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
+    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
     
     // Display results
     printClassificationReport(sift_metrics, class_names, "SIFT");

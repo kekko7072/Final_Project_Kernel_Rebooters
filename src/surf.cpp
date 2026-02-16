@@ -22,7 +22,7 @@ SURFExtractor::SURFExtractor(
     );
 
     // Initialize the BFMacher with L2 distance
-    matcher_ = cv::BFMatcher::create(cv::NORM_L2, false);
+    matcher_ = cv::FlannBasedMatcher::create();
 }
 
 void SURFExtractor::extract(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors){
