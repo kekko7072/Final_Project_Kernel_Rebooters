@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 using std::cout;
 using std::endl;
@@ -30,13 +31,25 @@ void printConfusionMatrix(
     }
 }
 
+static std::string formatTime(double milliseconds) {
+    int minutes = static_cast<int>(milliseconds / 60000);
+    int seconds = static_cast<int>((milliseconds - minutes * 60000) / 1000);
+    int ms = static_cast<int>(milliseconds) % 1000;
+    
+    std::ostringstream oss;
+    oss << std::setfill('0')
+        << std::setw(2) << minutes << ":"
+        << std::setw(2) << seconds << ":"
+        << std::setw(3) << ms;
+    return oss.str();
+}
+
 void printTimingStats(const Metrics& metrics){
-    cout << "\nTiming Statistics:" << endl;
-    cout << "Total: " << std::fixed << std::setprecision(2) << (totalProcessingTime(metrics) / 1000.0) << " s (" 
-                                                            << (totalProcessingTime(metrics) / 60000.0) << " minutes)" << endl;
-    cout << "Mean: " << meanProcessingTime(metrics) << " ms" << endl;
-    cout << "Min: " << minProcessingTime(metrics) << " ms" << endl;
-    cout << "Max: " << maxProcessingTime(metrics) << " ms" << endl;
+    cout << "\nTiming Statistics: min:sec:ms" << endl;
+    cout << "Total: " << formatTime(totalProcessingTime(metrics)) << endl;
+    cout << "Mean: " << formatTime(meanProcessingTime(metrics)) << endl;
+    cout << "Min: " << formatTime(minProcessingTime(metrics)) << endl;
+    cout << "Max: " << formatTime(maxProcessingTime(metrics)) << endl;
 }
 
 void printPerClassAccuracy(
