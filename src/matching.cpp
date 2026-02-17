@@ -14,19 +14,6 @@
 namespace
 {
 
-std::string flowerTypeToString(const FlowerType type)
-{
-    switch (type)
-    {
-        case FlowerType::Daisy: return "daisy";
-        case FlowerType::Dandelion: return "dandelion";
-        case FlowerType::Rose: return "rose";
-        case FlowerType::Sunflower: return "sunflower";
-        case FlowerType::Tulip: return "tulip";
-        default: return "unknown";
-    }
-}
-
 std::vector<const FlowerImage*> getAllTrainImages(
     const FlowerImageContainer& train_healthy_images,
     const FlowerImageContainer& train_diseased_images

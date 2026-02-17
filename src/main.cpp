@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
     }
     cout << "Images loaded successfully!" << endl;
 
+    // class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"}
+
     // Processing - SIFT --> Marco
 
     SIFTExtractor sift;
@@ -108,8 +110,6 @@ int main(int argc, char *argv[])
     Metrics sift_metrics = createMetrics(6);
 
     std::map<FlowerType, cv::Mat> sift_train_descriptors;
-
-    const std::vector<std::string> class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"};
     
     // Train SIFT
     trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
