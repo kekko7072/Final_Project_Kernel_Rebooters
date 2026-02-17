@@ -29,6 +29,7 @@ set(HEADER_FILES
     include/bow.h
     include/matching.h
     include/sift_processing.h
+    include/template_match_processing.hpp
     include/print_stats.h
 )
 set(SOURCE_FILES
