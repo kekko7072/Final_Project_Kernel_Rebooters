@@ -8,7 +8,7 @@
 #include <flower_image.hpp>
 
 /**
- * @brief The FlowerImageContainer class represents a set of FlowerImage objects
+ * @brief A container of FlowerImage objects
  */
 class FlowerImageContainer
 {
@@ -23,26 +23,33 @@ public:
 
     /**
      * @brief getImagesByFlowerType
+     *
+     * Time complexity O(n), where n = number of images of given FlowerType stored in the container
      * @param flower_type one of FlowerType values
      * @return a const vector of FlowerImage objects with given flower type
      */
     const std::vector<FlowerImage> getImagesByFlowerType(const FlowerType& flower_type) const;
 
     /**
-     * @brief empty Checks if the container has no elements
+     * @brief Checks if the container has no elements
      * @return true if the container is empty, false otherwise
      */
     bool empty() const;
 
     /**
-     * @brief size Returns the number of elements in the container
-     * @return
+     * @brief Returns the number of elements in the container
      */
     size_t size() const;
 
+    /**
+     * @brief Returns a reference to the FlowerImage object at the given index
+     */
     FlowerImage& at(const size_t i);
     const FlowerImage& at(const size_t i) const;
 
+    /**
+     * @brief Adds a FlowerImage object to the end of the container
+     */
     void push_back(const FlowerImage& img);
 
 private:
