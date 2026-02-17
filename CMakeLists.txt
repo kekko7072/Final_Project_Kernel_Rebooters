@@ -35,6 +35,7 @@ set(SOURCE_FILES
     src/main.cpp
     src/flower_image.cpp
     src/flower_image_container.cpp
+    src/flower_type.cpp
     src/preprocessing.cpp
     src/sift.cpp
     src/orb.cpp
