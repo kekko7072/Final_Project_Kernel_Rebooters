@@ -39,7 +39,150 @@
 	\textit{TODO}
 
 	\section{SIFT}
-	\textit{TODO}
+	\subsection{Code Structure Decision}
+	SIFT logic is organized into:
+	\begin{itemize}
+		\item \texttt{SIFTExtractor} (\texttt{include/sift.h}, \texttt{src/sift.cpp}) for 
+		low-level feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{sift\_processing} module (\texttt{include/sift\_processing.h}, 
+		\texttt{src/sift\_processing.cpp}) for dataset-level training and testing workflows.
+	\end{itemize}
+
+	This separation maintains architectural consistency with other modules: the extractor class 
+	handles algorithmic operations while the processing module orchestrates dataset traversal, 
+	descriptor aggregation, and prediction logic. As a result, \texttt{main.cpp} remains focused 
+	on high-level coordination, and the SIFT components can be independently tested, optimized, or replaced.
+
+	The \texttt{SIFTExtractor} interface exposes essential operations: \texttt{extract(...)}, 
+	\texttt{matchDescriptors(...)}, \texttt{filterMatches(...)}, and \texttt{matchAndFilter(...)}. 
+	Timing instrumentation is included to support performance analysis during development and evaluation phases.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are in grayscale to focus on gradient information rather than 
+		color variation.
+		\item SIFT parameters use OpenCV defaults with optional tuning: configurable number of features, 
+		octave layers, contrast threshold, edge threshold, and Gaussian sigma.
+		\item The default configuration (\texttt{nfeatures=0}) extracts all detected keypoints, providing 
+		maximum detail for the training phase.
+	\end{itemize}
+
+	The decision to use grayscale processing aligns with SIFT's design philosophy: the algorithm was 
+	originally developed for intensity-based matching, and color information typically adds minimal 
+	discriminative value while increasing computational cost.
+
+	\subsection{Training Pipeline}
+	The training workflow follows a clear sequence:
+	\begin{enumerate}
+		\item Extract SIFT descriptors from all healthy and diseased (if \texttt{use\_diseased} flag is set) training images.
+		\item Aggregate descriptors per class using vertical concatenation (\texttt{cv::vconcat}).
+		\item Store the combined descriptor matrices in a class-indexed map for efficient test-time retrieval.
+	\end{enumerate}
+
+	This pipeline choice reflects a bag-of-features approach: all descriptors from a given class 
+	are pooled together without explicit spatial structure. The rationale is simplicity and robustness
+	the classifier relies on the statistical distribution of local features rather than their precise 
+	geometric arrangement.
+
+	An important implementation detail is the use of \texttt{cv::vconcat} for descriptor combination, 
+	which is significantly faster than iterative concatenation and produces a single contiguous memory 
+	block per class.
+
+	\subsection{Matching and Classification Strategy}
+	For each test image:
+	\begin{enumerate}
+		\item Extract SIFT descriptors.
+		\item Match against each class's descriptor pool using FLANN-based matching.
+		\item Filter matches based on distance threshold: \( d_{match} < threshold \times d_{min} \).
+		\item Classify as the class with the maximum number of good matches.
+	\end{enumerate}
+
+	\subsection{Matcher Configuration}
+	Two matcher implementations were tested:
+	\begin{itemize}
+		\item \texttt{BFMatcher} with L2 norm: exhaustive search, guaranteed optimal matches, but 
+		slower for large descriptor sets (around 25 minutes for a classification).
+		\item \texttt{FlannBasedMatcher}: approximate nearest neighbor search using KD-trees, 
+		significantly faster with same accuracy (around 5 minutes for a classification).
+	\end{itemize}
+
+	The FLANN matcher was selected as the default after benchmarking showed 5x speedup with 
+	negligible impact on classification accuracy for this dataset.
+
+	\subsection{Robustness Choices}
+	\begin{itemize}
+		\item Empty image check before extraction with early return and error message.
+		\item Empty descriptor validation before matching operations.
+		\item Graceful handling of images with zero detected keypoints (skipped in testing loop).
+		\item Timing instrumentation for extraction and matching phases to identify performance bottlenecks.
+	\end{itemize}
+
+	\subsection{Performance Considerations}
+	The implementation includes several deliberate trade-offs:
+	\begin{itemize}
+		\item \textbf{Descriptor aggregation}: All training descriptors are stored in memory. 
+		For very large datasets (thousands of images per class), this could exceed available memory. 
+		A potential mitigation would be descriptor subsampling or clustering-based aggregation.
+		\item \textbf{Exhaustive matching}: Each test descriptor is matched against all training 
+		descriptors for a given class. This scales as \(O(N_{test} \times N_{train})\). FLANN provides 
+		partial relief.
+	\end{itemize}
+
+	These trade-offs were chosen to maintain code clarity and establish a functional baseline before 
+	introducing more complex optimization strategies.
+
+	\subsection{Tested Configurations}
+	Several parameters were evaluated during development:
+	\begin{itemize}
+		\item \textbf{Use of diseased descriptors}: Including diseased training samples improved 
+		classification accuracy.
+		\item \textbf{Distance threshold}: Values between 1.5 and 2.5 were tested for the ratio 
+		test-inspired filtering, with 2.0 providing a good balance between precision and recall.
+		\item \textbf{Matcher choice}: FLANN-based matching provided a significant speedup with 
+		no loss in accuracy compared to brute-force matching.
+		\item \textbf{Nearest Neighbor Distance Ratio}: The original Lowe's ratio test was implemented 
+		but found to be too restrictive for this dataset, leading to very few matches. 
+		The distance-based thresholding approach provided a more flexible filtering mechanism that 
+		retained more valid matches while still reducing false positives.
+		\item \textbf{Limits in train descriptor}: To mitigate the number of descriptors difference 
+		between classes, a maximum number of descriptors per class was tested (first 15000, then 30000). 
+		The sampling of those descriptors was done in multiple ways: random sampling, uniform sampling 
+		and k-means clustering. The best results were obtained with random sampling but this method was 
+		not consistent across runs. The other methods did not provide any improvement in accuracy and, 
+		expecially k-means was very time consuming. At the end, there is non limit on the number of train 
+		descriptors.
+	\end{itemize}
+
+	The final configuration selected for the evaluation phase was FLANN-based matching with a distance 
+	threshold of 2.0 and no limit on the number of training descriptors, as this provided the best overall 
+	accuracy while maintaining reasonable processing time.
+	
+	\begin{table}[H]
+		\centering
+		\medskip
+		\resizebox{\textwidth}{!}{
+		\begin{tabular}{llccclccccccc}
+			\toprule
+			\textbf{Matcher} & \textbf{Dataset} & \textbf{Thresh.} & \textbf{Train Descriptor} & \textbf{Time} & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
+			\midrule 
+			BF & Full & 2,5 & NULL & 26:15:996 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+			BF & Healthy & 2,5 & NULL & 03:04:159 & 15,63\% & 8,33\% & 41,67\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+			FLANN & Full & 2,5 & NULL & 06:54:950 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+			FLANN & Full & 2,0 & NULL & 05:25:163 & 23,44\% & 8,33\% & 41,67\% & 16,67\% & 16,67\% & 41,67\% & 0,00\% \\
+			FLANN & Full & 2,5 & 15k (rnd sample) & 04:17:885 & 20,31\% & 0,00\% & 33,33\% & 8,33\% & 25,00\% & 41,67\% & 0,00\% \\
+			FLANN & Full & 1,5 & 15k (rnd sample) & 03:57:923 & 25,00\% & 16,67\% & 41,67\% & 8,33\% & 33,33\% & 33,33\% & 0,00\% \\
+			FLANN & Full & 1,5 & NULL & 05:29:062 & 18,75\% & 16,67\% & 33,33\% & 8,33\% & 25,00\% & 16,67\% & 0,00\% \\
+			FLANN+NNDR & Full & 0,8 & NULL & 05:33:180 & 17,19\% & 25,00\% & 16,67\% & 8,33\% & 16,67\% & 25,00\% & 0,00\% \\
+			FLANN+NNDR & Full & 0,7 & NULL & 05:23:491 & 23,44\% & 33,33\% & 33,33\% & 0,00\% & 16,67\% & 41,67\% & 0,00\% \\
+			FLANN+NNDR & Full & 0,7 & 15k (unif sample) & 02:59:029 & 20,31\% & 41,67\% & 16,67\% & 8,33\% & 33,33\% & 8,33\% & 0,00\% \\
+			FLANN+NNDR & Full & 0,7 & 15k (k-means) & $>$30' train & 18,75\% & 41,67\% & 25,00\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+			FLANN & Full & 2,0 & 30k (unif sample) & 04:02:434 & 20,31\% & 8,33\% & 41,67\% & 8,33\% & 25,00\% & 25,00\% & 0,00\% \\
+			\bottomrule
+		\end{tabular}
+		}
+		\caption{SIFT performance evaluation}
+		\label{tab:SIFT_results}
+	\end{table}
 
 	\section{SURF}
 	\textit{TODO}
@@ -216,10 +359,37 @@
 	The latest revision further reduced complexity by removing unused state from HOG/BoW
 	extractors and retaining only the operations actually used by the pipeline.
 	
+	\section{Work Distribution}
+
+	The project workload was distributed among team members in the following way:
+	\begin{itemize}
+		\item Marco Carraro: SIFT, SURF and metrics system.
+		\item Luca Pellegrini: preprocessing pipeline image container infrastructure, template matching.
+		\item Francesco Vezzani: HOG and BoW implementation, matching wrappers,
+	\end{itemize}
+
+	All team members participated in code reviews, integration testing, and collaborative debugging sessions to ensure consistency across modules and resolve interface compatibility issues.
+	
+	\begin{table}[H]
+	\centering
+	\begin{tabular}{@{}lccc@{}}
+	\toprule
+	\textbf{Hours worked} & \textbf{Marco Carraro} & \textbf{Luca Pellegrini} & \textbf{Francesco Vezzani} \\ 
+	\midrule
+	\textbf{Total} & \textbf{$\sim$ 40} & \textbf{XX} & \textbf{XX} \\
+	\bottomrule
+	\end{tabular}
+	\caption{Approximate hours worked per team member}
+	
+	\end{table}
+	
 	\section*{References / Links}
 	
 	\begin{itemize}
 		\item Project repository: \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}
+		\item OpenCV SIFT documentation: \url{https://docs.opencv.org/4.5.4/d7/d60/classcv_1_1SIFT.html#a94ee0141f77675822e574bbd2c079811}
+		\item OpenCV SURF documentation: \url{https://docs.opencv.org/4.6.0/d5/df7/classcv_1_1xfeatures2d_1_1SURF.html}
+		\item OpenCV FlannBasedMatcher documentation: \url{https://docs.opencv.org/4.5.4/dc/de2/classcv_1_1FlannBasedMatcher.html}
 		\item OpenCV HOGDescriptor documentation: \url{https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html}
 		\item OpenCV ORB documentation: \url{https://docs.opencv.org/4.x/db/d95/classcv_1_1ORB.html}
 		\item OpenCV kmeans documentation: \url{https://docs.opencv.org/4.x/d1/d5c/tutorial_py_kmeans_opencv.html}
