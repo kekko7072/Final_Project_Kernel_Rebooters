@@ -221,7 +221,7 @@
 
 	\subsection{Feature Extraction Choices}
 	\begin{itemize}
-		\item Input images are converted to grayscale, consistent with SURF's original design 
+		\item Input images are used in grayscale, consistent with SURF's original design 
 		for intensity-based features.
 		\item SURF parameters use sensible defaults: Hessian threshold 400.0, 4 octaves, 3 
 		octave layers.
@@ -263,21 +263,75 @@
 	though optimal threshold values may differ between the two algorithms due to differences in 
 	descriptor distance distributions.
 
-	\subsection{Performance Considerations}
-	SURF inherits similar trade-offs to SIFT:
+	\section{ORB}
+	\subsection{Code Structure Decision}
+	ORB follows the established architectural pattern:
 	\begin{itemize}
-		\item Memory usage scales linearly with training set size.
-		\item Exhaustive matching against all training descriptors.
-		\item No spatial consistency verification.
+		\item \texttt{ORBExtractor} (\texttt{include/orb.h}, \texttt{src/orb.cpp}) for low-level 
+		feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{orb\_processing} module (\texttt{include/orb\_processing.h}, 
+		\texttt{src/orb\_processing.cpp}) for dataset-level training and testing workflows.
 	\end{itemize}
 
-	However, SURF typically produces fewer keypoints per image than SIFT (especially with higher 
-	Hessian thresholds), which can reduce memory footprint and matching time. This is reflected 
-	in the observed performance metrics, where SURF runs significantly faster than SIFT while 
-	maintaining comparable accuracy.
+	This structural consistency was intentional: by maintaining identical interfaces and 
+	workflows across SIFT, SURF, and ORB modules, the codebase remains maintainable and direct 
+	algorithm comparisons become straightforward. The only algorithmic differences are 
+	encapsulated within the respective extractor classes.
 
-	\section{ORB}
-	\textit{TODO}
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are used in grayscale, consistent with ORB's design for binary 
+		pattern matching.
+		\item ORB parameters are set to default values apart from \texttt{nfeatures}.
+		\item \texttt{nfeatures} is set to 1500, with threshold values adjusted accordingly 
+		for optimal classification performance.
+	\end{itemize}
+
+	A critical discovery during implementation was that ORB's \texttt{nfeatures} parameter 
+	behaves fundamentally differently from SIFT's equivalent. Setting \texttt{nfeatures=0} 
+	results in no keypoint detection, whereas SIFT interprets this as "extract all detected 
+	keypoints." This behavior necessitated explicit parameter specification and careful tuning 
+	to achieve acceptable performance.
+
+	\subsection{Training Pipeline}
+	The training workflow mirrors SIFT and SURF:
+	\begin{enumerate}
+		\item Extract ORB descriptors from healthy training images.
+		\item Optionally extract descriptors from diseased training images.
+		\item Aggregate descriptors per class using vertical concatenation.
+		\item Store combined descriptor matrices indexed by flower class.
+	\end{enumerate}
+
+	This structural equivalence ensures that performance differences can be attributed solely 
+	to the feature extraction algorithm rather than implementation variations.
+
+	\subsection{Matching Strategy}
+	ORB matching follows the same high-level strategy as SIFT/SURF but with a critical 
+	difference in the underlying matcher:
+	\begin{enumerate}
+		\item Extract ORB descriptors from test image.
+		\item Match against each class's descriptor pool using BFMatcher with Hamming distance.
+		FLANN-based matching is possible using LSH (Locality Sensitive Hashing) but typically 
+		slower than BFMatcher for binary descriptors.
+		\item Filter matches: \( d_{match} < \tau \cdot d_{min} \).
+		\item Classify as the class with maximum good matches.
+	\end{enumerate}
+
+	The classification decision remains:
+	\[
+	\hat{y}(x) = \arg\max_{c} |\text{good\_matches}(x, c)|
+	\]
+
+	\subsection{Parameter Tuning Process}
+	Initial implementation with \texttt{nfeatures=0} resulted in zero keypoint detection across 
+	all images. This revealed a fundamental difference between ORB and SIFT parameter 
+	interpretation:
+
+	\begin{itemize}
+		\item SIFT: \texttt{nfeatures=0} $\rightarrow$ extract all detected keypoints 
+		\item ORB: \texttt{nfeatures=0} $\rightarrow$ extract exactly zero keypoints
+		\item \texttt{nfeatures} $\geq$ 1000 to ensure sufficient descriptor density per image
+	\end{itemize}
 
 	\section{Template Matching}
 	\textit{TODO}
@@ -589,7 +643,7 @@
 
 	The project workload was distributed among team members in the following way:
 	\begin{itemize}
-		\item Marco Carraro: SIFT, SURF and metrics system.
+		\item Marco Carraro: SIFT, SURF, ORB and metrics system.
 		\item Luca Pellegrini: preprocessing pipeline image container infrastructure, template matching.
 		\item Francesco Vezzani: HOG and BoW implementation, matching wrappers,
 	\end{itemize}

@@ -30,6 +30,7 @@ set(HEADER_FILES
     include/matching.h
     include/sift_processing.h
     include/print_stats.h
+    include/orb_processing.h
 )
 set(SOURCE_FILES
     src/main.cpp
@@ -45,6 +46,7 @@ set(SOURCE_FILES
     src/metrics.cpp
     src/sift_processing.cpp
     src/print_stats.cpp
+    src/orb_processing.cpp
 )
 if(CONFIG_ENABLE_SURF)
     set(HEADER_FILES

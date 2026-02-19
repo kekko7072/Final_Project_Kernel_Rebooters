@@ -10,7 +10,7 @@
 class ORBExtractor {
     public:
         ORBExtractor(                       // Default parameters based on OpenCV documentation
-            int nfeatures = 500,            // The maximum number of features to retain
+            int nfeatures = 1500,           // The maximum number of features to retain
             float scaleFactor = 1.2f,       // Pyramid decimation ratio, greater than 1. scaleFactor==2 means the classical pyramid, where each next level has 4x less pixels than the previous, but such a big scale factor will degrade feature matching scores dramatically
             int nlevels = 8,                // The number of pyramid levels
             int edgeThreshold = 31,         // This is size of the border where the features are not detected. It should roughly match the patchSize parameter
@@ -42,7 +42,7 @@ class ORBExtractor {
 
     private:
         cv::Ptr<cv::ORB> orb_;
-        cv::Ptr<cv::BFMatcher> matcher_;
+        cv::Ptr<cv::DescriptorMatcher> matcher_;
         double extractionTime_;
         int keypointCount_;
         double matchingTime_;
