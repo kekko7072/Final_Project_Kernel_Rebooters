@@ -18,7 +18,7 @@
  * @return true if successful; false otherwise
  */
 bool loadImages(
-    const std::filesystem::path& data_path,
+    const std::filesystem::path data_path,
     FlowerImageContainer& test_imgs,
     FlowerImageContainer& train_healthy_imgs,
     FlowerImageContainer& train_diseased_imgs

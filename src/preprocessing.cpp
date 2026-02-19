@@ -13,7 +13,7 @@ using std::cerr;
 using std::endl;
 
 bool loadImages(
-    const fs::path& data_path,
+    const fs::path data_path,
     FlowerImageContainer& test_imgs,
     FlowerImageContainer& train_healthy_imgs,
     FlowerImageContainer& train_diseased_imgs
@@ -36,14 +36,14 @@ bool loadImages(
 }
 
 bool loadImagesFromDataset(
-    const fs::path& dir_path,
+    const fs::path dir_path,
     const bool healthy,
     const int img_type,
     FlowerImageContainer& imgs
 )
 {
-    using Flt = FlowerType;
-    FlowerType fl_type;
+    using FlTp = FlowerType;
+    FlTp fl_type;
     fs::directory_iterator fl_type_iterator {dir_path, fs::directory_options::skip_permission_denied};
     for (const auto& dir_entry : fl_type_iterator)
     {
@@ -52,17 +52,17 @@ bool loadImagesFromDataset(
             const std::string s {dir_entry.path().filename()};
             cout << dir_entry.path() << endl;
             if (s == "daisy")
-                fl_type = Flt::Daisy;
+                fl_type = FlTp::Daisy;
             else if (s == "dandelion")
-                fl_type = Flt::Dandelion;
+                fl_type = FlTp::Dandelion;
             else if (s == "roses")
-                fl_type = Flt::Rose;
+                fl_type = FlTp::Rose;
             else if (s == "sunflowers")
-                fl_type = Flt::Sunflower;
+                fl_type = FlTp::Sunflower;
             else if (s == "tulips")
-                fl_type = Flt::Tulip;
+                fl_type = FlTp::Tulip;
             else
-                fl_type = Flt::NoFlower;
+                fl_type = FlTp::NoFlower;
 
             fs::directory_iterator img_iterator {dir_entry.path(), fs::directory_options::skip_permission_denied};
             for (const auto& img_entry : img_iterator)
@@ -73,8 +73,8 @@ bool loadImagesFromDataset(
                     const std::string img_path_str {img_path.string()};
                     const std::string img_name {img_path.filename().string()};
                     //cout << "Loading image: " << img_path_str << endl;
-                    cv::Mat img_color = cv::imread(img_path_str, cv::IMREAD_COLOR);
-                    cv::Mat img_gray = cv::imread(img_path_str, cv::IMREAD_GRAYSCALE);
+                    cv::Mat_<cv::Vec3b> img_color = cv::imread(img_path_str, cv::IMREAD_COLOR);
+                    cv::Mat_<uchar> img_gray = cv::imread(img_path_str, cv::IMREAD_GRAYSCALE);
                     if (img_color.empty() || img_gray.empty())
                     {
                         cerr << "Error loading image: " << img_path_str << endl;
