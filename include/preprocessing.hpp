@@ -31,6 +31,35 @@ bool loadImagesFromDataset(
     FlowerImageContainer& imgs
 );
 
+/**
+ * @brief Load template images, used by the Template Matching algorithm
+ * @param data_path  Path to train/test dataset
+ * @param daisy_templates
+ * @param dandelion_templates
+ * @param rose_templates
+ * @param sunflower_templates
+ * @param tulip_templates
+ * @return true if successful; false otherwise
+ */
+bool loadTemplates(
+    const std::filesystem::path& data_path,
+    std::vector<FlowerTemplate>& daisy_templates,
+    std::vector<FlowerTemplate>& dandelion_templates,
+    std::vector<FlowerTemplate>& rose_templates,
+    std::vector<FlowerTemplate>& sunflower_templates,
+    std::vector<FlowerTemplate>& tulip_templates
+);
+
+bool loadTemplateFromDataset(
+    const std::filesystem::path template_dir_path,
+    const FlowerType fl_type,
+    const bool healthy,
+    std::vector<FlowerTemplate>& templates
+);
+
+/**
+ * @brief Checks if the given path refers to an image file
+ */
 bool isImage(const std::filesystem::path& file_path);
 
 #endif // PREPROCESSING_HPP

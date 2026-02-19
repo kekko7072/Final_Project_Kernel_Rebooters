@@ -13,6 +13,9 @@
  * template matching algorithm on the image with a suitable size (with respect
  * to the size of the template images).
  *
+ * Only TM_SQDIFF and TM_CCORR_NORMED matching methods from the OpenCV library
+ * support the use of a mask.
+ *
  * This function is meant to be run in a separate thread, and it will update the
  * `success` shared variable upon successful completion (or failure).
  *

@@ -103,6 +103,23 @@ int main(int argc, char *argv[])
     }
     cout << "Images loaded successfully!" << endl;
 
+    // Load template images
+    std::vector<FlowerTemplate> daisy_templates;
+    std::vector<FlowerTemplate> dandelion_templates;
+    std::vector<FlowerTemplate> rose_templates;
+    std::vector<FlowerTemplate> sunflower_templates;
+    std::vector<FlowerTemplate> tulip_templates;
+    bool templates_loaded = loadTemplates(
+        data_path,
+        daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates
+        );
+    if (!templates_loaded)
+    {
+        cerr << "Error loading templates. Aborting." << endl;
+        return 1;
+    }
+    cout << "Templates loaded successfully!" << endl;
+
     // class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"}
 
     // Processing - SIFT --> Marco
@@ -150,6 +167,18 @@ int main(int argc, char *argv[])
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
     
+    // Processing Template Matching --> Luca
+    bool tm_success {false};
+    template_match(
+        test_images,
+        daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates,
+        tm_success
+    );
+
+    if (!tm_success)
+    {
+        cerr << "Template Matching classifier failed!\n" << endl;
+    }
   
     // Processing - HOG --> Francesco
   
