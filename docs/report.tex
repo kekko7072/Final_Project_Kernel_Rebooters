@@ -161,31 +161,120 @@
 		\centering
 		\medskip
 		\resizebox{\textwidth}{!}{
-		\begin{tabular}{llccclccccccc}
-			\toprule
-			\textbf{Matcher} & \textbf{Dataset} & \textbf{Thresh.} & \textbf{Train Descriptor} & \textbf{Time} & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
-			\midrule 
-			BF & Full & 2,5 & NULL & 26:15:996 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
-			BF & Healthy & 2,5 & NULL & 03:04:159 & 15,63\% & 8,33\% & 41,67\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
-			FLANN & Full & 2,5 & NULL & 06:54:950 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
-			FLANN & Full & 2,0 & NULL & 05:25:163 & 23,44\% & 8,33\% & 41,67\% & 16,67\% & 16,67\% & 41,67\% & 0,00\% \\
-			FLANN & Full & 2,5 & 15k (rnd sample) & 04:17:885 & 20,31\% & 0,00\% & 33,33\% & 8,33\% & 25,00\% & 41,67\% & 0,00\% \\
-			FLANN & Full & 1,5 & 15k (rnd sample) & 03:57:923 & 25,00\% & 16,67\% & 41,67\% & 8,33\% & 33,33\% & 33,33\% & 0,00\% \\
-			FLANN & Full & 1,5 & NULL & 05:29:062 & 18,75\% & 16,67\% & 33,33\% & 8,33\% & 25,00\% & 16,67\% & 0,00\% \\
-			FLANN+NNDR & Full & 0,8 & NULL & 05:33:180 & 17,19\% & 25,00\% & 16,67\% & 8,33\% & 16,67\% & 25,00\% & 0,00\% \\
-			FLANN+NNDR & Full & 0,7 & NULL & 05:23:491 & 23,44\% & 33,33\% & 33,33\% & 0,00\% & 16,67\% & 41,67\% & 0,00\% \\
-			FLANN+NNDR & Full & 0,7 & 15k (unif sample) & 02:59:029 & 20,31\% & 41,67\% & 16,67\% & 8,33\% & 33,33\% & 8,33\% & 0,00\% \\
-			FLANN+NNDR & Full & 0,7 & 15k (k-means) & $>$30' train & 18,75\% & 41,67\% & 25,00\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
-			FLANN & Full & 2,0 & 30k (unif sample) & 04:02:434 & 20,31\% & 8,33\% & 41,67\% & 8,33\% & 25,00\% & 25,00\% & 0,00\% \\
-			\bottomrule
-		\end{tabular}
-		}
+			\begin{tabular}{llccclccccccc}
+				\toprule
+				\textbf{Matcher} & \textbf{Dataset} & \textbf{Thresh.} & \textbf{Train Descriptor} & \textbf{Time} & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
+				\midrule 
+				BF & Full & 2,5 & NULL & 26:15:996 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+				BF & Healthy & 2,5 & NULL & 03:04:159 & 15,63\% & 8,33\% & 41,67\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+				FLANN & Full & 2,5 & NULL & 06:54:950 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 2,0 & NULL & 05:25:163 & 23,44\% & 8,33\% & 41,67\% & 16,67\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 2,5 & 15k (rnd sample) & 04:17:885 & 20,31\% & 0,00\% & 33,33\% & 8,33\% & 25,00\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 1,5 & 15k (rnd sample) & 03:57:923 & 25,00\% & 16,67\% & 41,67\% & 8,33\% & 33,33\% & 33,33\% & 0,00\% \\
+				FLANN & Full & 1,5 & NULL & 05:29:062 & 18,75\% & 16,67\% & 33,33\% & 8,33\% & 25,00\% & 16,67\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,8 & NULL & 05:33:180 & 17,19\% & 25,00\% & 16,67\% & 8,33\% & 16,67\% & 25,00\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & NULL & 05:23:491 & 23,44\% & 33,33\% & 33,33\% & 0,00\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & 15k (unif sample) & 02:59:029 & 20,31\% & 41,67\% & 16,67\% & 8,33\% & 33,33\% & 8,33\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & 15k (k-means) & $>$30' train & 18,75\% & 41,67\% & 25,00\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+				FLANN & Full & 2,0 & 30k (unif sample) & 04:02:434 & 20,31\% & 8,33\% & 41,67\% & 8,33\% & 25,00\% & 25,00\% & 0,00\% \\
+				\bottomrule
+			\end{tabular}
+			}
 		\caption{SIFT performance evaluation}
 		\label{tab:SIFT_results}
 	\end{table}
 
 	\section{SURF}
-	\textit{TODO}
+	\subsection{Code Structure Decision}
+	SURF logic follows the same architectural pattern established for SIFT:
+	\begin{itemize}
+		\item \texttt{SURFExtractor} (\texttt{include/surf.h}, \texttt{src/surf.cpp}) for low-level 
+		feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{surf\_processing} module (\texttt{include/surf\_processing.h}, 
+		\texttt{src/surf\_processing.cpp}) for dataset-level training and testing workflows.
+	\end{itemize}
+
+	This parallel structure serves multiple purposes: it maintains consistency across the codebase, 
+	allows direct code comparison between SIFT and SURF implementations in \texttt{main.cpp}.
+
+	The \texttt{SURFExtractor} interface mirrors \texttt{SIFTExtractor}, exposing: \texttt{extract(...)},\\
+	\texttt{matchDescriptors(...)}, \texttt{filterMatches(...)}, and \texttt{matchAndFilter(...)}. 
+	This symmetry was a deliberate design decision to reduce cognitive load when working with multiple 
+	feature extractors and to facilitate comparative analysis.
+
+	\subsection{Conditional Compilation}
+	A critical implementation detail is that SURF support is optional and controlled through the 
+	\texttt{ENABLE\_SURF} preprocessor flag. This is necessary because SURF is part of OpenCV's 
+	\texttt{xfeatures2d} module, which requires separate installation and is not included in 
+	OpenCV's default distribution due to patent restrictions.
+
+	The conditional compilation pattern is implemented using:
+	\begin{verbatim}
+		#ifdef ENABLE_SURF
+		// SURF implementation
+		#endif // ENABLE_SURF
+	\end{verbatim}
+
+	This approach allows the project to compile and run without SURF when \texttt{xfeatures2d} 
+	is unavailable, while still supporting it when the module is properly installed. Users can 
+	enable SURF by configuring CMake with \texttt{-DCONFIG\_ENABLE\_SURF=ON}.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are converted to grayscale, consistent with SURF's original design 
+		for intensity-based features.
+		\item SURF parameters use sensible defaults: Hessian threshold 400.0, 4 octaves, 3 
+		octave layers.
+		\item The \texttt{extended} flag (defaulting to \texttt{false}) controls descriptor 
+		dimensionality: 64 dimensions for standard SURF, 128 for extended SURF.
+		\item The \texttt{upright} flag (defaulting to \texttt{false}) determines rotation 
+		invariance: when false, descriptors are rotation-invariant but computationally more expensive.
+	\end{itemize}
+
+	The Hessian threshold is the primary parameter controlling the number of detected keypoints. 
+	Higher values detect fewer but more distinctive keypoints, while lower values increase keypoint 
+	count at the cost of potentially including less stable features. 
+	The default is set to 100.0 but it has been increased to 400.0 to reduce the number of keypoints, 
+	speed up processing and increasing accuracy.
+
+	\subsection{Training Pipeline}
+	The training workflow is architecturally identical to SIFT:
+	\begin{enumerate}
+		\item Extract SURF descriptors from healthy training images.
+		\item Optionally extract descriptors from diseased training images.
+		\item Aggregate descriptors per class using \texttt{cv::vconcat}.
+		\item Store combined descriptor matrices indexed by flower class.
+	\end{enumerate}
+
+	This structural equivalence was intentional, it ensures that performance differences between SIFT 
+	and SURF can be attributed solely to the feature extraction algorithm rather than implementation 
+	variations in the classification pipeline.
+
+	\subsection{Matching Strategy}
+	The matching and classification strategy is identical to SIFT:
+	\begin{enumerate}
+		\item Extract SURF descriptors from test image.
+		\item Match against each class's descriptor pool using FLANN-based matching.
+		\item Filter matches: \( d_{match} < \tau \cdot d_{min} \).
+		\item Classify as the class with maximum good matches.
+	\end{enumerate}
+
+	Using the same threshold parameter \(\tau\) across SIFT and SURF allows for direct comparison, 
+	though optimal threshold values may differ between the two algorithms due to differences in 
+	descriptor distance distributions.
+
+	\subsection{Performance Considerations}
+	SURF inherits similar trade-offs to SIFT:
+	\begin{itemize}
+		\item Memory usage scales linearly with training set size.
+		\item Exhaustive matching against all training descriptors.
+		\item No spatial consistency verification.
+	\end{itemize}
+
+	However, SURF typically produces fewer keypoints per image than SIFT (especially with higher 
+	Hessian thresholds), which can reduce memory footprint and matching time. This is reflected 
+	in the observed performance metrics, where SURF runs significantly faster than SIFT while 
+	maintaining comparable accuracy.
 
 	\section{ORB}
 	\textit{TODO}

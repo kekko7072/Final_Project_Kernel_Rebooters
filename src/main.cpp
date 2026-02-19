@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         trainSURF(train_healthy_images, train_diseased_images, surf, surf_train_descriptors, class_names, true);
         
         // Test SURF
-        double surf_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
+        double surf_threshold = 2.0;  // Can be tuned (higher = stricter, lower = more matches)
         testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
         
         // Display results
