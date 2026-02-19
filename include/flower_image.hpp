@@ -19,31 +19,31 @@
 class FlowerImage
 {
 public:
+    FlowerImage() = default;
     FlowerImage(std::string name, FlowerType fl_type, bool healthy, int img_type,
-                cv::Mat img_color, cv::Mat img_gray);
-    FlowerImage();
+                cv::Mat_<cv::Vec3b>& img_color, cv::Mat_<uchar>& img_gray);
 
     /**
      * @brief Returns the BGR color version (3 channels) of the image
      */
-    const cv::Mat& getImageColor() const;
-    cv::Mat& getImageColor();
+    const cv::Mat_<cv::Vec3b>& getImageColor() const;
+    cv::Mat_<cv::Vec3b>& getImageColor();
 
     /**
      * @brief Returns the Grayscale version (1 channel) of the image
      */
-    const cv::Mat& getImageGrayscale() const;
-    cv::Mat& getImageGrayscale();
+    const cv::Mat_<uchar>& getImageGrayscale() const;
+    cv::Mat_<uchar>& getImageGrayscale();
 
     const std::string& name() const;
     const FlowerType& flowerType() const;
     bool isHealthy() const;
+    bool isTrain() const;
+    bool isTest() const;
     /**
      * @brief Returns 0 if train image; 1 if test image
      */
     int imageType() const;
-    bool isTrain() const;
-    bool isTest() const;
 
 private:
     std::string m_name;
@@ -51,8 +51,9 @@ private:
     bool m_healthy;
     int  m_image_type;  // 0 for train, 1 for test
 
-    cv::Mat m_image_color;
-    cv::Mat m_image_grayscale;
+protected:
+    cv::Mat_<cv::Vec3b> m_image_color;
+    cv::Mat_<uchar> m_image_grayscale;
 };
 
 #endif // FLOWER_IMAGE_HPP

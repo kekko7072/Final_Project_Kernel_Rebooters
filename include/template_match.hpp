@@ -1,8 +1,9 @@
 // Author: Luca Pellegrini
-#ifndef TEMPLATE_MATCH_PROCESSING_HPP
-#define TEMPLATE_MATCH_PROCESSING_HPP
+#ifndef TEMPLATE_MATCH_HPP
+#define TEMPLATE_MATCH_HPP
 
 #include <flower_image_container.hpp>
+#include <flower_template.hpp>
 
 /**
  * @brief Classifies test images with the Template Matching method
@@ -15,16 +16,17 @@
  * This function is meant to be run in a separate thread, and it will update the
  * `success` shared variable upon successful completion (or failure).
  *
- * @param test_images
- * @param template_images
- * @param t_mask_images
+ * @param test_images Test images as loaded by `loadImages()`
  * @param success shared variable to comunicate exit status to parent thread
  */
 void template_match(
     const FlowerImageContainer& test_images,
-    const FlowerImageContainer& template_images,
-    const FlowerImageContainer& t_mask_images,
+    const std::vector<FlowerTemplate>& daisy_templates,
+    const std::vector<FlowerTemplate>& dandelion_templates,
+    const std::vector<FlowerTemplate>& rose_templates,
+    const std::vector<FlowerTemplate>& sunflower_templates,
+    const std::vector<FlowerTemplate>& tulip_templates,
     bool& success
 );
 
-#endif // TEMPLATE_MATCH_PROCESSING_HPP
+#endif // TEMPLATE_MATCH_HPP

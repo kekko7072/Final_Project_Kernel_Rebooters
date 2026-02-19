@@ -7,9 +7,10 @@
 #include <flower_type.hpp>
 #include <flower_image.hpp>
 #include <flower_image_container.hpp>
+#include <flower_template.hpp>
 
 /**
- * @brief loadImages Load train and test images (from user-supplied or default path)
+ * @brief Load train and test images (from user-supplied or default path)
  * @param data_path           Path to train/test dataset
  * @param train_healthy_imgs  Output param, vector of train healthy flower images
  * @param train_diseased_imgs Output param, vector of train diseased flower images
@@ -24,7 +25,7 @@ bool loadImages(
 );
 
 bool loadImagesFromDataset(
-    const std::filesystem::path& dir_path,
+    const std::filesystem::path dir_path,
     const bool healthy,
     const int image_type,
     FlowerImageContainer& imgs

@@ -8,7 +8,9 @@
 #include <flower_type.hpp>
 #include <flower_image.hpp>
 #include <flower_image_container.hpp>
+#include <flower_template.hpp>
 #include <preprocessing.hpp>
+#include <template_match.hpp>
 #include <matching.h>
 
 #include "sift.h"
