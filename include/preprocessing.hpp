@@ -42,7 +42,7 @@ bool loadImagesFromDataset(
  * @return true if successful; false otherwise
  */
 bool loadTemplates(
-    const std::filesystem::path& data_path,
+    const std::filesystem::path data_path,
     std::vector<FlowerTemplate>& daisy_templates,
     std::vector<FlowerTemplate>& dandelion_templates,
     std::vector<FlowerTemplate>& rose_templates,
