@@ -13,6 +13,9 @@
 #include "orb.h"
 #include "metrics.h"
 
+using ClassificationRecord = std::array<std::string, 3>;
+using ClassificationRecap = std::vector<ClassificationRecord>;
+
 // Extract ORB features from a container and store them in a temporary map
 void extractORBFeaturesFromContainer(
     const FlowerImageContainer& images,
@@ -45,6 +48,7 @@ void testORB(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose = true
 );
 
@@ -52,7 +56,8 @@ void testORB(
 void orb(
     const FlowerImageContainer& test_images,
     const FlowerImageContainer& train_healthy,
-    const FlowerImageContainer& train_diseased
+    const FlowerImageContainer& train_diseased,
+    const std::string& output_dir
 );
 
 #endif // ORB_PROCESSING_H

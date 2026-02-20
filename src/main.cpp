@@ -104,16 +104,22 @@ int main(int argc, char *argv[])
     cout << "Images loaded successfully!" << endl;
 
 
-    // Processing - SIFT --> Marco
+    // Create results directory if it doesn't exist
+    fs::path output_dir = "../results";
 
-    sift(test_images, train_healthy_images, train_diseased_images);
+    if (!fs::exists(output_dir)) {
+        fs::create_directory(output_dir);
+    }
+
+
+    // Processing - SIFT --> Marco
+    sift(test_images, train_healthy_images, train_diseased_images, output_dir.string());
 
 
     // Processing - SURF --> Marco
-    
     #ifdef ENABLE_SURF
     {
-        surf(test_images, train_healthy_images, train_diseased_images);
+        surf(test_images, train_healthy_images, train_diseased_images, output_dir.string());
     } 
     #else
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
@@ -121,8 +127,7 @@ int main(int argc, char *argv[])
 
     
     // Processing - ORB --> Marco
-
-    orb(test_images, train_healthy_images, train_diseased_images);
+    orb(test_images, train_healthy_images, train_diseased_images, output_dir.string());
     
   
     // Processing - HOG --> Francesco

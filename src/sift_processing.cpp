@@ -4,7 +4,9 @@
 #include "print_stats.h"
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 using std::cout;
 using std::endl;
 
@@ -86,6 +88,7 @@ void testSIFT(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose)
 {
     cout << "\nSIFT Testing: " << endl;
@@ -135,6 +138,13 @@ void testSIFT(
         
         addPrediction(metrics, true_class, predicted_class);
         addProcessingTime(metrics, total_time);
+
+        ClassificationRecord record = {
+            test_img.name(),                
+            class_names[true_class],          
+            class_names[predicted_class]       
+        };
+        records->push_back(record);
         
         if (verbose) {
             cout << "Image: " << test_img.name() 
@@ -149,19 +159,25 @@ void testSIFT(
 void sift(
     const FlowerImageContainer& test_images,
     const FlowerImageContainer& train_healthy,
-    const FlowerImageContainer& train_diseased
+    const FlowerImageContainer& train_diseased,
+    const std::string& output_dir
 ) {
     SIFTExtractor sift;
     Metrics sift_metrics = createMetrics(6);
     std::map<FlowerType, cv::Mat> sift_train_descriptors;
+    ClassificationRecap sift_records;
     
     // Train SIFT
     trainSIFT(train_healthy, train_diseased, sift, sift_train_descriptors, class_names, true);
     
     // Test SIFT
     double sift_threshold = 2.0;  // Can be tuned (higher = more matches, lower = stricter)
-    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
+    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, &sift_records, true);
     
     // Display results
     printClassificationReport(sift_metrics, class_names, "SIFT");
+
+    // Save recap to file
+    fs::path output_path = fs::path(output_dir) / "sift_recap.txt";
+    saveClassificationRecap(sift_records, sift_metrics, class_names, "SIFT", output_path.string());
 }

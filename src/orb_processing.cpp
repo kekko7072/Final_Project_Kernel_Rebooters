@@ -4,7 +4,9 @@
 #include "print_stats.h"
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 using std::cout;
 using std::endl;
 
@@ -83,6 +85,7 @@ void testORB(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose)
 {
     cout << "\nORB Testing:" << endl;
@@ -132,6 +135,13 @@ void testORB(
         
         addPrediction(metrics, true_class, predicted_class);
         addProcessingTime(metrics, total_time);
+
+        ClassificationRecord record = {
+            test_img.name(),                   
+            class_names[true_class],           
+            class_names[predicted_class]       
+        };
+        records->push_back(record);
         
         if (verbose) {
             cout << "Image: " << test_img.name() 
@@ -145,20 +155,26 @@ void testORB(
 
 void orb(const FlowerImageContainer& test_images,
          const FlowerImageContainer& train_healthy,
-         const FlowerImageContainer& train_diseased)
+         const FlowerImageContainer& train_diseased,
+         const std::string& output_dir)
 {
     cout << "\n\n====================\n" << endl;
 
     ORBExtractor orb;  
     Metrics orb_metrics = createMetrics(6);
     std::map<FlowerType, cv::Mat> orb_train_descriptors;
+    ClassificationRecap orb_records;
     
     // Train ORB
     trainORB(train_healthy, train_diseased, orb, orb_train_descriptors, class_names, true);
     
     // Test ORB
     double orb_threshold = 1.5;  // Can be tuned (higher = more matches, lower = stricter)
-    testORB(test_images, orb_train_descriptors, orb, orb_metrics, class_names, orb_threshold, true);
+    testORB(test_images, orb_train_descriptors, orb, orb_metrics, class_names, orb_threshold, &orb_records, true);
     
     printClassificationReport(orb_metrics, class_names, "ORB");
+
+    // Save recap to file
+    fs::path output_path = fs::path(output_dir) / "orb_recap.txt";
+    saveClassificationRecap(orb_records, orb_metrics, class_names, "ORB", output_path.string());
 }
