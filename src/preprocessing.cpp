@@ -4,7 +4,9 @@
 #include <filesystem>
 #include <iostream>
 #include <set>
+#include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <flower_image_container.hpp>
 
 namespace fs = std::filesystem;
@@ -183,7 +185,13 @@ bool loadTemplateFromDataset(
             cerr << "Error loading template or mask" << endl;
             continue;
         }
-        FlowerTemplate templ {array.at(3*i), fl_type, healthy, 0, img_templ, img_mask};
+        // Resize all template and mask images to the same size
+        auto sz {cv::Size(400, 300)};
+        cv::Mat_<cv::Vec3b> dst_templ;
+        cv::Mat_<uchar> dst_mask;
+        cv::resize(img_templ, dst_templ, sz);
+        cv::resize(img_mask, dst_mask, sz);
+        FlowerTemplate templ {array.at(3*i), fl_type, healthy, 0, dst_templ, dst_mask};
         templates.push_back(templ);
         count_loaded++;
     }
