@@ -106,65 +106,23 @@ int main(int argc, char *argv[])
 
     // Processing - SIFT --> Marco
 
-    SIFTExtractor sift;
-
-    Metrics sift_metrics = createMetrics(6);
-
-    std::map<FlowerType, cv::Mat> sift_train_descriptors;
-    
-    // Train SIFT
-    trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
-    
-    // Test SIFT
-    double sift_threshold = 2.0;  // Can be tuned (higher = more matches, lower = stricter)
-    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
-    
-    // Display results
-    printClassificationReport(sift_metrics, class_names, "SIFT");
+    sift(test_images, train_healthy_images, train_diseased_images);
 
 
     // Processing - SURF --> Marco
     
     #ifdef ENABLE_SURF
     {
-        cout << "\n\n====================\n" << endl;
-        
-        SURFExtractor surf;
-
-        Metrics surf_metrics = createMetrics(6);
-
-        std::map<FlowerType, cv::Mat> surf_train_descriptors;
-
-        // Train SURF
-        trainSURF(train_healthy_images, train_diseased_images, surf, surf_train_descriptors, class_names, true);
-        
-        // Test SURF
-        double surf_threshold = 1.8;  // Can be tuned (higher = more matches, lower = stricter)
-        testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
-        
-        // Display results
-        printClassificationReport(surf_metrics, class_names, "SURF");
+        surf(test_images, train_healthy_images, train_diseased_images);
     } 
     #else
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
 
-    cout << "\n\n====================\n" << endl;
-        
-    ORBExtractor orb;  
+    
+    // Processing - ORB --> Marco
 
-    Metrics orb_metrics = createMetrics(6);
-
-    std::map<FlowerType, cv::Mat> orb_train_descriptors;
-    
-    // Train ORB
-    trainORB(train_healthy_images, train_diseased_images, orb, orb_train_descriptors, class_names, true);
-    
-    // Test ORB
-    double orb_threshold = 1.5;  // Can be tuned (higher = more matches, lower = stricter)
-    testORB(test_images, orb_train_descriptors, orb, orb_metrics, class_names, orb_threshold, true);
-    
-    printClassificationReport(orb_metrics, class_names, "ORB");
+    orb(test_images, train_healthy_images, train_diseased_images);
     
   
     // Processing - HOG --> Francesco

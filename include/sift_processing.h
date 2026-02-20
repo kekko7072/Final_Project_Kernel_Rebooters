@@ -48,4 +48,11 @@ void testSIFT(
     bool verbose = true
 );
 
+// Wrapper function to run the entire SIFT pipeline (training + testing)
+void sift(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased
+);
+
 #endif // SIFT_PROCESSING_H

@@ -3,6 +3,7 @@
 #ifdef ENABLE_SURF
 
 #include "surf_processing.h"
+#include "print_stats.h"
 #include <iostream>
 #include <chrono>
 
@@ -144,10 +145,31 @@ void testSURF(
             cout << "Image: " << test_img.name() 
                  << " | True: " << class_names[true_class]
                  << " | Predicted: " << class_names[predicted_class]
-                 << " | Matches: " << max_matches 
+                // << " | Matches: " << max_matches     // DEBUG
                  << " | Time: " << total_time << " ms" << endl;
         }
     }
+}
+
+void surf(const FlowerImageContainer& test_images,
+          const FlowerImageContainer& train_healthy,
+          const FlowerImageContainer& train_diseased)
+{
+    cout << "\n\n====================\n" << endl;
+
+    SURFExtractor surf;
+    Metrics surf_metrics = createMetrics(6);
+    std::map<FlowerType, cv::Mat> surf_train_descriptors;
+
+    // Train SURF
+    trainSURF(train_healthy, train_diseased, surf, surf_train_descriptors, class_names, true);
+    
+    // Test SURF
+    double surf_threshold = 1.8;  // Can be tuned (higher = more matches, lower = stricter)
+    testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
+    
+    // Display results
+    printClassificationReport(surf_metrics, class_names, "SURF");
 }
 
 #endif // ENABLE_SURF

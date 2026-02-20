@@ -1,6 +1,7 @@
 // Author: Marco Carraro
 
 #include "sift_processing.h"
+#include "print_stats.h"
 #include <iostream>
 #include <chrono>
 
@@ -139,8 +140,28 @@ void testSIFT(
             cout << "Image: " << test_img.name() 
                  << " | True: " << class_names[true_class]
                  << " | Predicted: " << class_names[predicted_class]
-                 << " | Matches: " << max_matches 
+                // << " | Matches: " << max_matches     // DEBUG 
                  << " | Time: " << total_time << " ms" << endl;
         }
     }
+}
+
+void sift(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased
+) {
+    SIFTExtractor sift;
+    Metrics sift_metrics = createMetrics(6);
+    std::map<FlowerType, cv::Mat> sift_train_descriptors;
+    
+    // Train SIFT
+    trainSIFT(train_healthy, train_diseased, sift, sift_train_descriptors, class_names, true);
+    
+    // Test SIFT
+    double sift_threshold = 2.0;  // Can be tuned (higher = more matches, lower = stricter)
+    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
+    
+    // Display results
+    printClassificationReport(sift_metrics, class_names, "SIFT");
 }

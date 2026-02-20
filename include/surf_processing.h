@@ -51,5 +51,12 @@ void testSURF(
     bool verbose = true
 );
 
+// Wrapper function to run the entire SURF pipeline (training + testing)
+void surf(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased
+);
+
 #endif // ENABLE_SURF
 #endif // SURF_PROCESSING_H

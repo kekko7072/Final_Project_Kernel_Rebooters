@@ -1,6 +1,7 @@
 // Author: Marco Carraro
 
 #include "orb_processing.h"
+#include "print_stats.h"
 #include <iostream>
 #include <chrono>
 
@@ -136,8 +137,28 @@ void testORB(
             cout << "Image: " << test_img.name() 
                  << " | True: " << class_names[true_class]
                  << " | Predicted: " << class_names[predicted_class]
-                 << " | Matches: " << max_matches 
+                // << " | Matches: " << max_matches     // DEBUG
                  << " | Time: " << total_time << " ms" << endl;
         }
     }
+}
+
+void orb(const FlowerImageContainer& test_images,
+         const FlowerImageContainer& train_healthy,
+         const FlowerImageContainer& train_diseased)
+{
+    cout << "\n\n====================\n" << endl;
+
+    ORBExtractor orb;  
+    Metrics orb_metrics = createMetrics(6);
+    std::map<FlowerType, cv::Mat> orb_train_descriptors;
+    
+    // Train ORB
+    trainORB(train_healthy, train_diseased, orb, orb_train_descriptors, class_names, true);
+    
+    // Test ORB
+    double orb_threshold = 1.5;  // Can be tuned (higher = more matches, lower = stricter)
+    testORB(test_images, orb_train_descriptors, orb, orb_metrics, class_names, orb_threshold, true);
+    
+    printClassificationReport(orb_metrics, class_names, "ORB");
 }

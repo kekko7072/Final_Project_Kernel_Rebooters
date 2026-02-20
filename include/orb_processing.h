@@ -48,4 +48,11 @@ void testORB(
     bool verbose = true
 );
 
+// Wrapper function to run the entire ORB pipeline (training + testing)
+void orb(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased
+);
+
 #endif // ORB_PROCESSING_H
