@@ -3,6 +3,7 @@
 #define FLOWER_IMAGE_CONTAINER_HPP
 
 #include <map>
+#include <vector>
 
 #include <flower_type.hpp>
 #include <flower_image.hpp>
@@ -20,6 +21,8 @@ public:
      * @return a const reference to the underlying vector of FlowerImage objects
      */
     const std::vector<FlowerImage>& getImagesVector() const;
+
+    const std::map<FlowerType, std::vector<size_t>>& getMap() const;
 
     /**
      * @brief getImagesByFlowerType
@@ -52,9 +55,21 @@ public:
      */
     void push_back(const FlowerImage& img);
 
+    /**
+     * @brief Combines two FlowerImageContainer into one, preserving the ordering of the elements
+     * @param first
+     * @param second
+     * @param out output FlowerImageContainer, passed by reference
+     */
+    static void combineContainers(
+        const FlowerImageContainer& first,
+        const FlowerImageContainer& second,
+        FlowerImageContainer& out
+    );
+
 private:
     std::vector<FlowerImage> m_vec;
-    std::map<FlowerType, std::vector<size_t>> m_map_flower_type_indices;
+    std::map<FlowerType, std::vector<size_t>> m_map;
 };
 
 #endif // FLOWER_IMAGE_CONTAINER_HPP

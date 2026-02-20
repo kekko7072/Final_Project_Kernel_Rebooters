@@ -16,6 +16,11 @@ enum class FlowerType {Daisy = 0,
                        NoFlower = 5};
 
 /**
+ * @brief Number of classes recognized by the flower_classifier
+ */
+const size_t num_classes {6};
+
+/**
  * @brief Vector containing the names of the classes recognized by the flower_classifier
  *
  * Classes are listed in the same order in which they are defined in the FlowerType enum.
@@ -24,11 +29,6 @@ enum class FlowerType {Daisy = 0,
 const std::vector<std::string> class_names = {
     "Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"
 };
-
-/**
- * @brief Number of classes recognized by the flower_classifier
- */
-const size_t num_classes {class_names.size()};
 
 /**
  * @brief flowerTypeToString Get the string representing a given flower type
