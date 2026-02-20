@@ -32,4 +32,9 @@ void template_match(
     bool& success
 );
 
+double processImage(
+    const cv::Mat_<cv::Vec3b> image,
+    const std::vector<FlowerTemplate>& templates
+);
+
 #endif // TEMPLATE_MATCH_HPP

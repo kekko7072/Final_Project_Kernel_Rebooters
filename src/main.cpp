@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
     
-    // Processing Template Matching --> Luca
+    // Processing - Template Matching --> Luca
     bool tm_success {false};
     template_match(
         test_images,

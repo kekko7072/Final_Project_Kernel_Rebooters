@@ -1,27 +1,33 @@
 // Author: Luca Pellegrini
 #include <flower_type.hpp>
 
-#include <map>
+#include <string>
 
 const std::string flowerTypeToString(const FlowerType& type, bool lowercase)
 {
     // Make sure that the strings here match those listed in `class_names`!!!
-    // map element: {FlowerType, pair{uppercase string, lowercase string}
-    static const std::map<FlowerType, std::pair<std::string, std::string>> map {
-        {FlowerType::Daisy,     {"Daisy",     "daisy"}},
-        {FlowerType::Dandelion, {"Dandelion", "dandelion"}},
-        {FlowerType::Rose,      {"Rose",      "rose"}},
-        {FlowerType::Sunflower, {"Sunflower", "sunflower"}},
-        {FlowerType::Tulip,     {"Tulip",     "tulip"}},
-        {FlowerType::NoFlower,  {"NoFlower",  "no flower"}}
-    };
-    const std::pair<std::string, std::string> pair {map.at(type)};
-    if (lowercase)
+    using FT = FlowerType;
+    std::string str;
+    switch (type)
     {
-        return pair.second;
+    case FT::Daisy:
+        str = lowercase ? "daisy" : "Daisy";
+        break;
+    case FT::Dandelion:
+        str = lowercase ? "dandelion" : "Dandelion";
+        break;
+    case FT::Rose:
+        str = lowercase ? "rose" : "Rose";
+        break;
+    case FT::Sunflower:
+        str = lowercase ? "sunflower" : "Sunflower";
+        break;
+    case FT::Tulip:
+        str = lowercase ? "tulip" : "Tulip";
+        break;
+    case FT::NoFlower:
+        str = lowercase ? "no flower" : "NoFlower";
+        break;
     }
-    else
-    {
-        return pair.first;
-    }
+    return str;
 }
