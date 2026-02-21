@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             return 1;
         }
     } else {
-        cout << "\nOutput directory already exists: " << output_dir.string() << endl;
+        cout << "\nOutput directory " << output_dir.string() << " already exists" << endl;
     }
 
 

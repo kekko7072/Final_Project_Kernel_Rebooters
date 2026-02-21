@@ -673,7 +673,26 @@
 	\textit{Section reserved for flower health detection details (to be completed).}
 
 	\section{Performance Evaluation}
-	\textit{Section reserved for metrics, confusion matrix, and timing analysis (to be completed).}
+	\begin{table}[H]
+		\centering
+		\medskip
+		\resizebox{\textwidth}{!}{
+			\begin{tabular}{ccccccccc}
+				\toprule
+				\textbf{Algorithm} & \textbf{Time} mn::ss::ms & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
+				\midrule 
+				SIFT & 02:36:875 & 21,88\% & 16,67\% & 41,67\% & 8,33\%  & 25,00\% & 25,00\% & 0,00\% \\
+				SURF & 01:36:980 & 29,69\% & 33,33\% & 58,33\% & 25,00\% & 16,67\% & 25,00\% & 0,00\% \\
+				ORB  & 01:04:009 & 21,88\% & 25,00\% & 16,67\% & 25,00\% & 25,00\% & 25,00\% & 0,00\% \\
+				TM   & 08:04:068 & 20,31\% & 0,00\%  & 41,67\% & 16,67\% & 0,00\%  & 50,00\% & 0,00\% \\
+				HOG  & 00:00:285 & 31,25\% & 16,67\% & 66,67\% & 8,33\%  & 16,67\% & 58,33\% & 0,00\% \\
+				BoW  & 00:01:875 & 34,38\% & 33,33\% & 41,67\% & 16,67\% & 50,00\% & 41,67\% & 0,00\% \\		
+				\bottomrule
+			\end{tabular}
+			}
+		\caption{Performance evaluation}
+		\label{tab:alg_results}
+	\end{table}
 
 	\section{Conclusion}
 	In this iteration, HOG and BoW were integrated as simple and modular baselines.
