@@ -21,6 +21,7 @@ set(HEADER_FILES
     include/flower_image.hpp
     include/flower_image_container.hpp
     include/flower_type.hpp
+    include/flower_template.hpp
     include/preprocessing.hpp
     include/metrics.h
     include/orb.h
@@ -29,12 +30,16 @@ set(HEADER_FILES
     include/bow.h
     include/matching.h
     include/sift_processing.h
+    include/template_match.hpp
     include/print_stats.h
+    include/orb_processing.h
 )
 set(SOURCE_FILES
     src/main.cpp
     src/flower_image.cpp
     src/flower_image_container.cpp
+    src/flower_type.cpp
+    src/flower_template.cpp
     src/preprocessing.cpp
     src/sift.cpp
     src/orb.cpp
@@ -43,7 +48,9 @@ set(SOURCE_FILES
     src/matching.cpp
     src/metrics.cpp
     src/sift_processing.cpp
+    src/template_match.cpp
     src/print_stats.cpp
+    src/orb_processing.cpp
 )
 if(CONFIG_ENABLE_SURF)
     set(HEADER_FILES

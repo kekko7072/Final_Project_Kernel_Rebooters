@@ -13,6 +13,9 @@
 #include "sift.h"
 #include "metrics.h"
 
+using ClassificationRecord = std::array<std::string, 3>;
+using ClassificationRecap = std::vector<ClassificationRecord>;
+
 // Extract SIFT features from a container and store them in a temporary map
 void extractSIFTFeaturesFromContainer(
     const FlowerImageContainer& images,
@@ -45,7 +48,16 @@ void testSIFT(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose = true
+);
+
+// Wrapper function to run the entire SIFT pipeline (training + testing)
+void sift(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased,
+    const std::string& output_dir
 );
 
 #endif // SIFT_PROCESSING_H

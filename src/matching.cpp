@@ -2,30 +2,20 @@
 
 #include "matching.h"
 
+#include <chrono>
 #include <iostream>
 #include <vector>
 #include <limits>
 
 #include <flower_type.hpp>
 #include <flower_image.hpp>
+#include <metrics.h>
+#include <print_stats.h>
 #include <hog.h>
 #include <bow.h>
 
 namespace
 {
-
-std::string flowerTypeToString(const FlowerType type)
-{
-    switch (type)
-    {
-        case FlowerType::Daisy: return "daisy";
-        case FlowerType::Dandelion: return "dandelion";
-        case FlowerType::Rose: return "rose";
-        case FlowerType::Sunflower: return "sunflower";
-        case FlowerType::Tulip: return "tulip";
-        default: return "unknown";
-    }
-}
 
 std::vector<const FlowerImage*> getAllTrainImages(
     const FlowerImageContainer& train_healthy_images,
@@ -55,6 +45,7 @@ void hog(
 )
 {
     std::cout << "\n[HOG] Simple matching" << std::endl;
+    Metrics metrics = createMetrics(static_cast<int>(num_classes));
 
     const std::vector<const FlowerImage*> train_images =
         getAllTrainImages(train_healthy_images, train_diseased_images);
@@ -73,6 +64,8 @@ void hog(
 
     for (const FlowerImage& test_img : test_images.getImagesVector())
     {
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         std::vector<float> test_descriptor;
         extractor.extract(test_img.getImageGrayscale(), test_descriptor);
         if (test_descriptor.empty())
@@ -82,7 +75,7 @@ void hog(
         }
 
         double best_distance = std::numeric_limits<double>::max();
-        const FlowerImage* best_train_img {nullptr};
+        FlowerType predicted_type {FlowerType::NoFlower};
 
         for (size_t i {0}; i < train_images.size(); i++)
         {
@@ -95,21 +88,29 @@ void hog(
             if (distance < best_distance)
             {
                 best_distance = distance;
-                best_train_img = train_images[i];
+                predicted_type = train_images[i]->flowerType();
             }
         }
 
-        if (best_train_img == nullptr)
-        {
-            std::cout << "[HOG] " << test_img.name() << " -> no match" << std::endl;
-            continue;
-        }
+        auto end_time = std::chrono::high_resolution_clock::now();
+        const double total_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+
+        addPrediction(
+            metrics,
+            static_cast<int>(test_img.flowerType()),
+            static_cast<int>(predicted_type)
+        );
+        addProcessingTime(metrics, total_time);
 
         std::cout << "[HOG] " << test_img.name()
-                  << " -> predicted " << flowerTypeToString(best_train_img->flowerType())
+                  << " | true " << flowerTypeToString(test_img.flowerType())
+                  << " | predicted " << flowerTypeToString(predicted_type)
                   << " (distance: " << best_distance << ")"
+                  << " | time: " << total_time << " ms"
                   << std::endl;
     }
+
+    printClassificationReport(metrics, class_names, "HOG");
 }
 
 void bow(
@@ -119,6 +120,7 @@ void bow(
 )
 {
     std::cout << "\n[BOW] Simple matching" << std::endl;
+    Metrics metrics = createMetrics(static_cast<int>(num_classes));
 
     const std::vector<const FlowerImage*> train_images =
         getAllTrainImages(train_healthy_images, train_diseased_images);
@@ -150,6 +152,8 @@ void bow(
 
     for (const FlowerImage& test_img : test_images.getImagesVector())
     {
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         cv::Mat test_histogram;
         if (!extractor.extract(test_img.getImageGrayscale(), test_histogram))
         {
@@ -158,7 +162,7 @@ void bow(
         }
 
         double best_distance = std::numeric_limits<double>::max();
-        const FlowerImage* best_train_img {nullptr};
+        FlowerType predicted_type {FlowerType::NoFlower};
 
         for (size_t i {0}; i < train_images.size(); i++)
         {
@@ -171,19 +175,27 @@ void bow(
             if (distance < best_distance)
             {
                 best_distance = distance;
-                best_train_img = train_images[i];
+                predicted_type = train_images[i]->flowerType();
             }
         }
 
-        if (best_train_img == nullptr)
-        {
-            std::cout << "[BOW] " << test_img.name() << " -> no match" << std::endl;
-            continue;
-        }
+        auto end_time = std::chrono::high_resolution_clock::now();
+        const double total_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+
+        addPrediction(
+            metrics,
+            static_cast<int>(test_img.flowerType()),
+            static_cast<int>(predicted_type)
+        );
+        addProcessingTime(metrics, total_time);
 
         std::cout << "[BOW] " << test_img.name()
-                  << " -> predicted " << flowerTypeToString(best_train_img->flowerType())
+                  << " | true " << flowerTypeToString(test_img.flowerType())
+                  << " | predicted " << flowerTypeToString(predicted_type)
                   << " (distance: " << best_distance << ")"
+                  << " | time: " << total_time << " ms"
                   << std::endl;
     }
+
+    printClassificationReport(metrics, class_names, "BoW");
 }

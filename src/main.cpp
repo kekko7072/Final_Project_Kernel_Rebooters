@@ -8,13 +8,17 @@
 #include <flower_type.hpp>
 #include <flower_image.hpp>
 #include <flower_image_container.hpp>
+#include <flower_template.hpp>
 #include <preprocessing.hpp>
+#include <template_match.hpp>
 #include <matching.h>
 
 #include "sift.h"
 #include "sift_processing.h"
 #include "print_stats.h"
 #include "metrics.h"
+#include "orb.h"
+#include "orb_processing.h"
 
 #ifdef ENABLE_SURF
 #include "surf.h"
@@ -101,61 +105,71 @@ int main(int argc, char *argv[])
     }
     cout << "Images loaded successfully!" << endl;
 
+    // Load template images
+    std::vector<FlowerTemplate> daisy_templates;
+    std::vector<FlowerTemplate> dandelion_templates;
+    std::vector<FlowerTemplate> rose_templates;
+    std::vector<FlowerTemplate> sunflower_templates;
+    std::vector<FlowerTemplate> tulip_templates;
+    bool templates_loaded = loadTemplates(
+        data_path,
+        daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates
+        );
+    if (!templates_loaded)
+    {
+        cerr << "Error loading templates. Aborting." << endl;
+        return 1;
+    }
+    cout << "Templates loaded successfully!" << endl;
+
+    // Create results directory if it doesn't exist
+    fs::path output_dir = "../results";
+
+    if (!fs::exists(output_dir)) {
+        fs::create_directory(output_dir);
+        cout << "Created output directory: " << output_dir.string() << endl;
+    } else {
+        cout << "Output directory already exists: " << output_dir.string() << endl;
+    }
+
+
     // Processing - SIFT --> Marco
-
-    SIFTExtractor sift;
-
-    Metrics sift_metrics = createMetrics(6);
-
-    std::map<FlowerType, cv::Mat> sift_train_descriptors;
-
-    const std::vector<std::string> class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"};
-    
-    // Train SIFT
-    trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
-    
-    // Test SIFT
-    double sift_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
-    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
-    
-    // Display results
-    printClassificationReport(sift_metrics, class_names, "SIFT");
+    sift(test_images, train_healthy_images, train_diseased_images, output_dir.string());
 
 
     // Processing - SURF --> Marco
-    
     #ifdef ENABLE_SURF
     {
-        cout << "\n\n====================\n" << endl;
-        
-        SURFExtractor surf;
-
-        Metrics surf_metrics = createMetrics(6);
-
-        std::map<FlowerType, cv::Mat> surf_train_descriptors;
-
-        // Train SURF
-        trainSURF(train_healthy_images, train_diseased_images, surf, surf_train_descriptors, class_names, true);
-        
-        // Test SURF
-        double surf_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
-        testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
-        
-        // Display results
-        printClassificationReport(surf_metrics, class_names, "SURF");
+        surf(test_images, train_healthy_images, train_diseased_images, output_dir.string());
     } 
     #else
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
+
     
+    // Processing - ORB --> Marco
+    orb(test_images, train_healthy_images, train_diseased_images, output_dir.string());
+    
+    // Processing - Template Matching --> Luca
+    bool tm_success {false};
+    template_match(
+        test_images,
+        daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates,
+        tm_success
+    );
+
+    if (!tm_success)
+    {
+        cerr << "Template Matching classifier failed!\n" << endl;
+    }
   
     // Processing - HOG --> Francesco
   
-    hog(test_images, train_healthy_images, train_diseased_images);
+    // hog(test_images, train_healthy_images, train_diseased_images);
   
     // Processing - BOW --> Francesco
   
-    bow(test_images, train_healthy_images, train_diseased_images);
+    // bow(test_images, train_healthy_images, train_diseased_images);
 
     return 0;
 }

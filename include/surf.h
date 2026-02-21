@@ -12,7 +12,7 @@
 class SURFExtractor {
     public:
         SURFExtractor(                        // Default parameters based on OpenCV documentation
-            double hessianThreshold = 100.0,  // Threshold for hessian keypoint detector
+            double hessianThreshold = 400.0,  // Threshold for hessian keypoint detector
             int nOctaves = 4,                 // Number of pyramid octaves the keypoint detector will use
             int nOctaveLayers = 3,            // Number of octave layers within each octave
             bool extended = false,            // Extended descriptor flag (true = 128, false = 64)

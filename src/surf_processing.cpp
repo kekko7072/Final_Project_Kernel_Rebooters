@@ -3,9 +3,12 @@
 #ifdef ENABLE_SURF
 
 #include "surf_processing.h"
+#include "print_stats.h"
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 using std::cout;
 using std::endl;
 
@@ -48,7 +51,7 @@ void combineSURFDescriptors(
         train_descriptors[flower_type] = combined;
         
         int idx = static_cast<int>(flower_type);
-        cout << "  " << class_names[idx] 
+        cout << class_names[idx] 
              << ": " << combined.rows << " descriptors" << endl;
     }
 }
@@ -87,6 +90,7 @@ void testSURF(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose)
 {
     cout << "\nSURF Testing:" << endl;
@@ -139,15 +143,49 @@ void testSURF(
         
         addPrediction(metrics, true_class, predicted_class);
         addProcessingTime(metrics, total_time);
+
+        ClassificationRecord record = {
+            test_img.name(),                    
+            class_names[true_class],            
+            class_names[predicted_class]        
+        };
+        records->push_back(record);
         
         if (verbose) {
             cout << "Image: " << test_img.name() 
                  << " | True: " << class_names[true_class]
                  << " | Predicted: " << class_names[predicted_class]
-                 << " | Matches: " << max_matches 
+                // << " | Matches: " << max_matches     // DEBUG
                  << " | Time: " << total_time << " ms" << endl;
         }
     }
+}
+
+void surf(const FlowerImageContainer& test_images,
+          const FlowerImageContainer& train_healthy,
+          const FlowerImageContainer& train_diseased,
+          const std::string& output_dir)
+{
+    cout << "\n\n====================\n" << endl;
+
+    SURFExtractor surf;
+    Metrics surf_metrics = createMetrics(6);
+    std::map<FlowerType, cv::Mat> surf_train_descriptors;
+    ClassificationRecap surf_records;
+
+    // Train SURF
+    trainSURF(train_healthy, train_diseased, surf, surf_train_descriptors, class_names, true);
+    
+    // Test SURF
+    double surf_threshold = 1.8;  // Can be tuned (higher = more matches, lower = stricter)
+    testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, &surf_records, true);
+    
+    // Display results
+    printClassificationReport(surf_metrics, class_names, "SURF");
+
+    // Save recap to file
+    fs::path output_path = fs::path(output_dir) / "surf_recap.txt";
+    saveClassificationRecap(surf_records, surf_metrics, class_names, "SURF", output_path.string());
 }
 
 #endif // ENABLE_SURF
