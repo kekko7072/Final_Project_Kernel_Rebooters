@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{makecell}
 
 \geometry{margin=2.5cm}
 
@@ -673,19 +674,24 @@
 	\textit{Section reserved for flower health detection details (to be completed).}
 
 	\section{Performance Evaluation}
+	Table~\ref{tab:alg_results} presents a comprehensive comparison of all implemented algorithms on the 
+	flower classification task. The evaluation metrics include total processing time, overall classification 
+	accuracy and per-class accuracy for each of the six flower categories. All experiments were conducted 
+	on identical hardware (vlab environment) using the same train/test split to ensure fair comparison.
+
 	\begin{table}[H]
 		\centering
 		\medskip
 		\resizebox{\textwidth}{!}{
 			\begin{tabular}{ccccccccc}
 				\toprule
-				\textbf{Algorithm} & \textbf{Time} mn::ss::ms & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
+				\textbf{Algorithm} & \makecell{\textbf{Time} \\ (mm::ss::ms)} & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
 				\midrule 
 				SIFT & 02:36:875 & 21,88\% & 16,67\% & 41,67\% & 8,33\%  & 25,00\% & 25,00\% & 0,00\% \\
 				SURF & 01:36:980 & 29,69\% & 33,33\% & 58,33\% & 25,00\% & 16,67\% & 25,00\% & 0,00\% \\
 				ORB  & 01:04:009 & 21,88\% & 25,00\% & 16,67\% & 25,00\% & 25,00\% & 25,00\% & 0,00\% \\
-				TM   & 08:04:068 & 20,31\% & 0,00\%  & 41,67\% & 16,67\% & 0,00\%  & 50,00\% & 0,00\% \\
-				HOG  & 00:00:285 & 31,25\% & 16,67\% & 66,67\% & 8,33\%  & 16,67\% & 58,33\% & 0,00\% \\
+				TM   & 08:04:068 & 20,31\% &  0,00\% & 41,67\% & 16,67\% &  0,00\% & 50,00\% & 0,00\% \\
+				HOG  & 00:00:285 & 31,25\% & 16,67\% & 66,67\% &  8,33\% & 16,67\% & 58,33\% & 0,00\% \\
 				BoW  & 00:01:875 & 34,38\% & 33,33\% & 41,67\% & 16,67\% & 50,00\% & 41,67\% & 0,00\% \\		
 				\bottomrule
 			\end{tabular}
@@ -695,11 +701,90 @@
 	\end{table}
 
 	\section{Conclusion}
-	In this iteration, HOG and BoW were integrated as simple and modular baselines.
-	The main design decision was to keep a consistent extractor interface and move
-	algorithm-level loops outside \texttt{main.cpp} into a dedicated matching module.
-	The latest revision further reduced complexity by removing unused state from HOG/BoW
-	extractors and retaining only the operations actually used by the pipeline.
+	\subsubsection{Overall Performance Ranking}
+	The algorithms can be ranked by overall accuracy as follows:
+	\begin{enumerate}
+		\item \textbf{BoW (34.38\%)}: Best overall performer, demonstrating the effectiveness of 
+		vocabulary-based approaches for this task.
+		\item \textbf{HOG (31.25\%)}: Second best, achieving competitive accuracy with dramatically 
+		lower computational cost.
+		\item \textbf{SURF (29.69\%)}: Best among local feature descriptors, balancing speed and accuracy 
+		effectively.
+		\item \textbf{SIFT/ORB (21.88\%)}: Tied performance but with significantly different computational 
+		profiles.
+		\item \textbf{TM (20.31\%)}: Lowest accuracy, limited by its template-based approach.
+	\end{enumerate}
+
+	\subsubsection{Speed vs Accuracy Tradeoff}
+	The results reveal distinct speed-accuracy tradeoffs:
+
+	\textbf{HOG} achieves the best computational efficiency, processing the entire pipeline in under 1 
+	second while maintaining competitive accuracy (31.25\%).
+
+	\textbf{BoW} provides the highest accuracy (34.38\%) at a modest computational cost (1.875 seconds), 
+	representing an excellent balance for offline analysis.
+
+	\textbf{SURF} demonstrates the advantage of approximation strategies in local feature matching, 
+	achieving 8\% higher accuracy than SIFT while requiring only 60\% of the processing time. This 
+	validates the design choice of using Fast Hessian detection and reduced descriptor dimensionality.
+
+	\textbf{ORB}, despite being the fastest local feature method (64 seconds), does not achieve accuracy 
+	gains over SIFT. The binary descriptor's computational advantages are offset by reduced discriminative 
+	power for this particular task.
+
+	\textbf{Template Matching} exhibits the worst speed-accuracy tradeoff, requiring over 8 minutes while 
+	achieving only 20.31\% accuracy. This poor performance is expected given the high variability in flower 
+	appearance, scale and viewpoint across images.
+
+	\subsubsection{Per-Class Performance Patterns}
+	\textbf{Dandelion} is the easiest class to classify, with most algorithms achieving 40-65\% accuracy. 
+	HOG achieves the best performance (66.67\%), likely due to dandelions' distinctive radial gradient 
+	structure that HOG captures effectively.
+
+	\textbf{Rose} is the most challenging class, with accuracies ranging from 8-25\%. The low performance 
+	across all methods suggests high intra-class variability (different rose colors, bloom stages, viewing 
+	angles) that confuses gradient-based and local feature approaches alike.
+
+	\textbf{Sunflower} shows algorithm-dependent performance: BoW achieves 50\% accuracy while SIFT/SURF/ORB 
+	remain at 16-25\%. This suggests that vocabulary-based encoding better captures the distinctive but 
+	complex texture patterns of sunflower centers compared to direct descriptor matching.
+
+	\textbf{Tulip} performance varies widely (25-58\%), with HOG achieving the best result. This variation 
+	suggests that shape-based features (captured by HOG) are more discriminative than texture-based 
+	features for tulips.
+
+	\textbf{Daisy} shows moderate and consistent performance (16-33\%) across methods, suggesting it has 
+	neither distinctive shape nor texture features that any single approach can exploit effectively.
+
+	\textbf{NoFlower} achieves 0\% accuracy across all algorithms, indicating systematic failure to 
+	recognize negative examples. This is a critical limitation due to the lack of sufficient NoFlower 
+	diversity in the training set and all algorithms are biased toward predicting one of the five flower 
+	classes thanks to the winner-takes-all classification strategy.
+
+	\subsubsection{Critical Observations}
+	\textbf{NoFlower failure} is the most significant finding: 0\% accuracy across all six algorithms 
+	indicates a fundamental problem. Potential causes include:
+	\begin{itemize}
+		\item Insufficient negative examples in training set
+		\item Class imbalance favoring flower classes
+		\item Lack of explicit "reject" threshold in winner-takes-all classification
+		\item Distribution mismatch between training and test NoFlower images
+	\end{itemize}
+
+	\textbf{Rose classification difficulty} (consistently lowest per-class accuracy) suggests that roses 
+	exhibit the highest visual variability among flower classes, making them difficult to model with any 
+	single feature representation.
+
+	\textbf{BoW superiority} indicates that mid-level feature representations (visual vocabularies) are
+	better suited to this task than raw local descriptors or global gradient statistics, possibly due to 
+	better handling of intra-class variation.
+
+	\subsection{Limitations and Conclusions}
+	The relatively low absolute accuracies (20-34\%) indicate that traditional feature-based methods 
+	struggle with the inherent complexity of flower classification.
+
+	Despite these limitations, the implemented system provides a solid baseline, comprehensive evaluation 
+	framework and modular architecture that facilitates future improvements and extensions.
 	
 	\section{Work Distribution}
 
