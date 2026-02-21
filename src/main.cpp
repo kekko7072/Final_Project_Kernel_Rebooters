@@ -12,17 +12,11 @@
 #include <preprocessing.hpp>
 #include <template_match.hpp>
 #include <matching.h>
-
-#include "sift.h"
-#include "sift_processing.h"
-#include "print_stats.h"
-#include "metrics.h"
-#include "orb.h"
-#include "orb_processing.h"
+#include <sift_processing.h>
+#include <orb_processing.h>
 
 #ifdef ENABLE_SURF
-#include "surf.h"
-#include "surf_processing.h"
+#include <surf_processing.h>
 #endif
 
 namespace fs = std::filesystem;
@@ -123,7 +117,7 @@ int main(int argc, char *argv[])
     cout << "Templates loaded successfully!" << endl;
 
     // Create results directory if it doesn't exist
-    fs::path output_dir = "../results";
+    const fs::path output_dir {"../results"};
 
     cout << "\nChecking output directory: " << output_dir.string() << endl;
     if (!fs::exists(output_dir)) {
@@ -160,6 +154,7 @@ int main(int argc, char *argv[])
     template_match(
         test_images,
         daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates,
+        output_dir,
         tm_success
     );
 

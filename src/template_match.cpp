@@ -15,6 +15,9 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+using ClassificationRecord = std::array<std::string, 3>;
+using ClassificationRecap = std::vector<ClassificationRecord>;
+
 void template_match(
     const FlowerImageContainer& test_images,
     const std::vector<FlowerTemplate>& daisy_templates,
@@ -22,6 +25,7 @@ void template_match(
     const std::vector<FlowerTemplate>& rose_templates,
     const std::vector<FlowerTemplate>& sunflower_templates,
     const std::vector<FlowerTemplate>& tulip_templates,
+    const fs::path output_dir,
     bool& success
 )
 {
@@ -30,7 +34,7 @@ void template_match(
     // Create a Metrics object
     Metrics tm_metrics = createMetrics(num_classes);
     // Create classification records' vector
-    std::vector< std::array< std::string, 3 > > tm_class_records;
+    ClassificationRecap tm_class_records;
 
     // for (const auto& templ : tulip_templates)
     // {
@@ -76,9 +80,9 @@ void template_match(
             score_1 = processImage(dst_1, daisy_templates);
             score_2 = processImage(dst_2, daisy_templates);
             double best_score = (score_1 > score_2) ? score_1 : score_2;
-            cout << "template_match: image " << image.name()
-                 << " class " << flowerTypeToString(FlowerType::Daisy)
-                 << " score " << best_score << endl;  // DEBUG
+            // cout << "template_match: image " << image.name()
+            //      << " class " << flowerTypeToString(FlowerType::Daisy)
+            //      << " score " << best_score << endl;  // DEBUG
             class_scores.at(0) = best_score;
         }
         // Dandelion
@@ -86,9 +90,9 @@ void template_match(
             score_1 = processImage(dst_1, dandelion_templates);
             score_2 = processImage(dst_2, dandelion_templates);
             double best_score = (score_1 > score_2) ? score_1 : score_2;
-            cout << "template_match: image " << image.name()
-                 << " class " << flowerTypeToString(FlowerType::Dandelion)
-                 << " score " << best_score << endl;  // DEBUG
+            // cout << "template_match: image " << image.name()
+            //      << " class " << flowerTypeToString(FlowerType::Dandelion)
+            //      << " score " << best_score << endl;  // DEBUG
             class_scores.at(1) = best_score;
         }
         // Rose
@@ -96,9 +100,9 @@ void template_match(
             score_1 = processImage(dst_1, rose_templates);
             score_2 = processImage(dst_2, rose_templates);
             double best_score = (score_1 > score_2) ? score_1 : score_2;
-            cout << "template_match: image " << image.name()
-                 << " class " << flowerTypeToString(FlowerType::Rose)
-                 << " score " << best_score << endl;  // DEBUG
+            // cout << "template_match: image " << image.name()
+            //      << " class " << flowerTypeToString(FlowerType::Rose)
+            //      << " score " << best_score << endl;  // DEBUG
             class_scores.at(2) = best_score;
         }
         // Sunflower
@@ -106,9 +110,9 @@ void template_match(
             score_1 = processImage(dst_1, sunflower_templates);
             score_2 = processImage(dst_2, sunflower_templates);
             double best_score = (score_1 > score_2) ? score_1 : score_2;
-            cout << "template_match: image " << image.name()
-                 << " class " << flowerTypeToString(FlowerType::Sunflower)
-                 << " score " << best_score << endl;  // DEBUG
+            // cout << "template_match: image " << image.name()
+            //      << " class " << flowerTypeToString(FlowerType::Sunflower)
+            //      << " score " << best_score << endl;  // DEBUG
             class_scores.at(3) = best_score;
         }
         // Tulip
@@ -116,9 +120,9 @@ void template_match(
             score_1 = processImage(dst_1, tulip_templates);
             score_2 = processImage(dst_2, tulip_templates);
             double best_score = (score_1 > score_2) ? score_1 : score_2;
-            cout << "template_match: image " << image.name()
-                 << " class " << flowerTypeToString(FlowerType::Tulip)
-                 << " score " << best_score << endl;  // DEBUG
+            // cout << "template_match: image " << image.name()
+            //      << " class " << flowerTypeToString(FlowerType::Tulip)
+            //      << " score " << best_score << endl;  // DEBUG
             class_scores.at(4) = best_score;
         }
 
@@ -178,10 +182,21 @@ void template_match(
         addPrediction(tm_metrics, true_class, predicted_class);
         addProcessingTime(tm_metrics, total_time);
 
-        cout << "image " << image.name() << " prediction: " << flowerTypeToString(predicted_type) << endl;
+        ClassificationRecord record = {
+            image.name(),
+            class_names[true_class],
+            class_names[predicted_class]
+        };
+        tm_class_records.push_back(record);
+
+        // cout << "image " << image.name() << " prediction: " << flowerTypeToString(predicted_type) << endl;
     }
 
     printClassificationReport(tm_metrics, class_names, "Template Match");
+    // Save classification recap to file
+    fs::path records_path {output_dir / "sift_recap.txt"};
+    saveClassificationRecap(tm_class_records, tm_metrics, class_names, "SIFT", records_path.string());
+
     success = true;
 }
 
