@@ -360,7 +360,37 @@
 	\end{itemize}
 
 	\section{Template Matching}
+	The Template Matching methods uses hand-picked template images (5 out of the 15 train healthy images available for every flower class) to classify the test images using the standard \texttt{cv::matchTemplate} function.
 
+	Template Matching relies of a simple idea: slide the template over one test image, and compute a similarity score for each relative position between the template and the image.
+	Depending on the similarity score chosen (OpenCV provides several options), the minimum or maximun score achieved will correspond to the best match between template and image.
+
+	\subsection{Code Structure Decision}
+	Template Matching logis is split into:
+	\begin{itemize}
+		\item \texttt{processImage} function: compares one test images with one set of templates (of one the classes)
+		\item \texttt{template_match} function: complete wrapper of the Template Matching routine, iterates over all test images and compares similarity scores achieved with different classes to assign a final prediction
+	\end{itemize}
+
+	\subsection{Feature Extraction Choices}
+	Since the Template Matching methods is heavily dependent on the size of both the template and the image been processed, and since templates images within each class have different sizes, all template images and associated masks are resize, with \texttt{cv::resize}, to a size of 400x300.
+	This step is necessary to allow comparison of matching scores between templates, as the use of templates of different sizes would lead to matching scores being not normalized.
+
+	To improve classification, every test image is processed twice, in two different sizes (1200x900 and 800x600), and the best matching score for every class is kept.
+
+	\subsection{Matching Choices}
+	The \texttt{cv::matchTemplate} function allows a mask to be specified only if either TM_SQDIFF or TM_CCORR_NORMED are used as similarity scores.
+
+	Both similarity scores lead to similar classification results with our setup, so the TM_CCORR_NORMED (normalized cross-correlation) score was chosen.
+
+	\subsection{Robustness Choices}
+	\begin{itemize}
+		\item Empty input image check in \texttt{template_match(...)}.
+		\item Empty input template or mask in \texttt{processImage(...)}
+	\end{itemize}
+
+	\subsection{Trade-off}
+	The implementation is intentionally simple and readable, with time complexity \(O(N_{test} \cdot N_{template_per_class} \cdot N_{classes})\).
 
 	\section{HOG}
 	\subsection{Objective}
