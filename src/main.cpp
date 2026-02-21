@@ -165,11 +165,11 @@ int main(int argc, char *argv[])
   
     // Processing - HOG --> Francesco
   
-    // hog(test_images, train_healthy_images, train_diseased_images);
+    hog(test_images, train_healthy_images, train_diseased_images, output_dir.string());
   
     // Processing - BOW --> Francesco
   
-    // bow(test_images, train_healthy_images, train_diseased_images);
+    bow(test_images, train_healthy_images, train_diseased_images, output_dir.string());
 
     return 0;
 }

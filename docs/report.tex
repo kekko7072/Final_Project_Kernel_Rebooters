@@ -24,16 +24,20 @@
 	
 	\section{Introduction}
 	The overall goal of this project is to build a complete computer vision pipeline that can
-	classify flower images and support further analysis tasks, such as health-state estimation
-	and performance evaluation. In practical terms, the system is designed around a clear
+	classify flower images and support performance evaluation across different feature-based
+	approaches. In practical terms, the system is designed around a clear
 	workflow: images are loaded from a structured dataset, visual descriptors are extracted,
 	test images are compared against training references, and final predictions are produced.
 
-	This report remains a shared team document, so section titles for all project components
-	are kept even when implementation details are still pending. The current revision documents
-	the HOG and BoW modules according to their latest simplified implementation: both modules
-	now expose compact extractor interfaces focused only on feature extraction, vocabulary
-	creation (for BoW), and descriptor matching.
+	The project includes multiple classification branches with a common evaluation pipeline:
+	SIFT, SURF (optional at compile time), ORB, Template Matching, HOG, and BoW. While each
+	branch uses a different representation and matching strategy, all of them are integrated
+	in the same application flow and rely on the same metrics infrastructure for accuracy,
+	confusion matrix, timing statistics, and recap export.
+
+	This report is therefore organized by module, first documenting architecture and
+	implementation decisions for each algorithm, then summarizing the shared metrics system and
+	experimental results.
 
 	\section{Preprocessing}
 	\textit{TODO}
