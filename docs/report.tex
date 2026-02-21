@@ -11,7 +11,8 @@
 
 \geometry{margin=2.5cm}
 
-\title{Report Kernel Rebooters: Vision Division}
+\title{Report Kernel Rebooters: Vision Division\\[0.5em]
+\small \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}}
 \author{ 
 	Marco Carraro \\ {\small \texttt{marco.carraro.23@studenti.unipd.it}} \and
 	Luca Pellegrini \\ {\small \texttt{luca.pellegrini.6@studenti.unipd.it}} \and
@@ -675,13 +676,56 @@
 	about which algorithm is best suited for the flower classification task.
 
 	\section{Flower Health Detection}
-	\textit{Section reserved for flower health detection details (to be completed).}
+	\subsection{Objective and Challenges}
+	The initial project scope included a binary health classifier to distinguish between healthy and 
+	diseased flowers. However, implementation was not feasible due to two critical limitations:
+
+	\begin{itemize}
+		\item Absence of ground truth labels
+		\item Training data quality issues
+	\end{itemize}
+
+	\subsubsection{Absence of Ground Truth}
+	The test dataset lacks health status labels entirely:
+	\begin{itemize}
+		\item Test image filenames do not encode health status
+		\item No separate directories or metadata for healthy vs diseased test images
+	\end{itemize}
+
+	Without ground truth, it is impossible to compute accuracy, generate confusion matrices or validate 
+	classifier performance. This fundamentally prevents quantitative evaluation of any health 
+	classification system.
+
+	\subsubsection{Training Data Quality Issues}
+	Analysis of the training set revealed significant problems:
+	\begin{itemize}
+		\item \textbf{Visual similarity}: Many diseased images show only subtle differences from healthy 
+		ones (minor discoloration, early-stage infections)
+		\item \textbf{Grayscale conversion loss}: Plant diseases manifest primarily through color changes 
+		(yellowing, browning, spots), but the current pipeline discards color information
+	\end{itemize}
+
+	\subsection{System Architecture Support}
+	The codebase was designed with health classification extension in mind:
+
+	\begin{itemize}
+		\item Training functions include \texttt{use\_diseased} parameter for easy toggling
+		\item Clear separation between \texttt{train\_healthy} and \texttt{train\_diseased} containers
+		\item Modular design allows adding \texttt{trainHealthClassifier} and \texttt{testHealthClassifier} functions without architectural changes
+	\end{itemize}
+
+
+	Flower health detection was not implemented due to absent test labels and inadequate training data 
+	quality. The system architecture supports this extension once suitable data becomes available, but 
+	successful implementation will likely require color-preserving feature extraction or learning-based 
+	approaches designed specifically for disease symptom detection.
 
 	\section{Performance Evaluation}
 	Table~\ref{tab:alg_results} presents a comprehensive comparison of all implemented algorithms on the 
 	flower classification task. The evaluation metrics include total processing time, overall classification 
 	accuracy and per-class accuracy for each of the six flower categories. All experiments were conducted 
 	on identical hardware (vlab environment) using the same train/test split to ensure fair comparison.
+	Obviusly the time result may vary on different runs.
 
 	\begin{table}[H]
 		\centering
@@ -817,7 +861,7 @@
 	\section*{References / Links}
 	
 	\begin{itemize}
-		\item Project repository: \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}
+		% \item Project repository: \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}
 		\item OpenCV SIFT documentation: \url{https://docs.opencv.org/4.5.4/d7/d60/classcv_1_1SIFT.html#a94ee0141f77675822e574bbd2c079811}
 		\item OpenCV SURF documentation: \url{https://docs.opencv.org/4.6.0/d5/df7/classcv_1_1xfeatures2d_1_1SURF.html}
 		\item OpenCV FlannBasedMatcher documentation: \url{https://docs.opencv.org/4.5.4/dc/de2/classcv_1_1FlannBasedMatcher.html}
