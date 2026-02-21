@@ -674,10 +674,48 @@
 	about which algorithm is best suited for the flower classification task.
 
 	\section{Flower Health Detection}
-	\textit{Section reserved for flower health detection details (to be completed).}
+	In the current pipeline, health information is handled at dataset level.
+	Training images are loaded from both \texttt{train\_healthy\_photos} and
+	\texttt{train\_diseased\_photos}, and each \texttt{FlowerImage} stores a
+	\texttt{healthy} flag. This allows all feature extractors (SIFT, SURF, ORB,
+	HOG, BoW) to learn species representations that include both healthy and
+	diseased visual conditions.
+
+	At this stage, the classifier outputs only flower species (plus
+	\texttt{NoFlower}) and does not yet provide an explicit healthy/diseased
+	prediction for test images. As a next extension, health detection can be
+	implemented as a second stage after species prediction, using either:
+	(i) nearest-neighbor label transfer from the best matched train sample, or
+	(ii) a dedicated binary healthy-vs-diseased classifier per species.
 
 	\section{Performance Evaluation}
-	\textit{Section reserved for metrics, confusion matrix, and timing analysis (to be completed).}
+	Performance was evaluated on 64 test images using the common metrics module.
+	Table \ref{tab:perf_summary} summarizes the recap files generated in
+	\texttt{results/}.
+
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{lccc}
+			\toprule
+			\textbf{Algorithm} & \textbf{Accuracy} & \textbf{Mean Time (ms)} & \textbf{Total Time (ms)} \\
+			\midrule
+			SIFT & 21.88\% & 1583.36 & 101334.92 \\
+			ORB  & 21.88\% & 203.55  & 13027.08  \\
+			HOG  & 31.25\% & 1.77    & 113.06    \\
+			BoW  & 29.69\% & 16.01   & 1024.61   \\
+			\bottomrule
+		\end{tabular}
+		\caption{Summary of measured performance on the test set}
+		\label{tab:perf_summary}
+	\end{table}
+
+	Main observations:
+	\begin{itemize}
+		\item HOG achieved the best overall accuracy in this run (31.25\%) and was also the fastest.
+		\item BoW provided the second-best accuracy (29.69\%) with low computational cost.
+		\item SIFT and ORB reached similar accuracy (21.88\%), but SIFT was significantly slower.
+		\item The \texttt{NoFlower} class had 0.00\% accuracy for all reported methods, indicating a consistent false-positive issue on non-flower images.
+	\end{itemize}
 
 	\section{Conclusion}
 	In this iteration, HOG and BoW were integrated as simple and modular baselines.
