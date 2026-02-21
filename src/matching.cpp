@@ -3,6 +3,7 @@
 #include "matching.h"
 
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -13,6 +14,8 @@
 #include <print_stats.h>
 #include <hog.h>
 #include <bow.h>
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -41,11 +44,13 @@ std::vector<const FlowerImage*> getAllTrainImages(
 void hog(
     const FlowerImageContainer& test_images,
     const FlowerImageContainer& train_healthy_images,
-    const FlowerImageContainer& train_diseased_images
+    const FlowerImageContainer& train_diseased_images,
+    const std::string& output_dir
 )
 {
     std::cout << "\n[HOG] Simple matching" << std::endl;
     Metrics metrics = createMetrics(static_cast<int>(num_classes));
+    ClassificationRecap records;
 
     const std::vector<const FlowerImage*> train_images =
         getAllTrainImages(train_healthy_images, train_diseased_images);
@@ -95,12 +100,15 @@ void hog(
         auto end_time = std::chrono::high_resolution_clock::now();
         const double total_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
 
-        addPrediction(
-            metrics,
-            static_cast<int>(test_img.flowerType()),
-            static_cast<int>(predicted_type)
-        );
+        const int true_class = static_cast<int>(test_img.flowerType());
+        const int predicted_class = static_cast<int>(predicted_type);
+        addPrediction(metrics, true_class, predicted_class);
         addProcessingTime(metrics, total_time);
+        records.push_back({
+            test_img.name(),
+            class_names[true_class],
+            class_names[predicted_class]
+        });
 
         std::cout << "[HOG] " << test_img.name()
                   << " | true " << flowerTypeToString(test_img.flowerType())
@@ -111,16 +119,21 @@ void hog(
     }
 
     printClassificationReport(metrics, class_names, "HOG");
+
+    fs::path output_path = fs::path(output_dir) / "hog_recap.txt";
+    saveClassificationRecap(records, metrics, class_names, "HOG", output_path.string());
 }
 
 void bow(
     const FlowerImageContainer& test_images,
     const FlowerImageContainer& train_healthy_images,
-    const FlowerImageContainer& train_diseased_images
+    const FlowerImageContainer& train_diseased_images,
+    const std::string& output_dir
 )
 {
     std::cout << "\n[BOW] Simple matching" << std::endl;
     Metrics metrics = createMetrics(static_cast<int>(num_classes));
+    ClassificationRecap records;
 
     const std::vector<const FlowerImage*> train_images =
         getAllTrainImages(train_healthy_images, train_diseased_images);
@@ -182,12 +195,15 @@ void bow(
         auto end_time = std::chrono::high_resolution_clock::now();
         const double total_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
 
-        addPrediction(
-            metrics,
-            static_cast<int>(test_img.flowerType()),
-            static_cast<int>(predicted_type)
-        );
+        const int true_class = static_cast<int>(test_img.flowerType());
+        const int predicted_class = static_cast<int>(predicted_type);
+        addPrediction(metrics, true_class, predicted_class);
         addProcessingTime(metrics, total_time);
+        records.push_back({
+            test_img.name(),
+            class_names[true_class],
+            class_names[predicted_class]
+        });
 
         std::cout << "[BOW] " << test_img.name()
                   << " | true " << flowerTypeToString(test_img.flowerType())
@@ -198,4 +214,7 @@ void bow(
     }
 
     printClassificationReport(metrics, class_names, "BoW");
+
+    fs::path output_path = fs::path(output_dir) / "bow_recap.txt";
+    saveClassificationRecap(records, metrics, class_names, "BoW", output_path.string());
 }
