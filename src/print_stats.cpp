@@ -46,11 +46,11 @@ static std::string formatTime(double milliseconds) {
 }
 
 void printTimingStats(const Metrics& metrics){
-    cout << "\nTiming Statistics: min:sec:ms" << endl;
-    cout << "Total: " << formatTime(totalProcessingTime(metrics)) << endl;
-    cout << "Mean: " << formatTime(meanProcessingTime(metrics)) << endl;
-    cout << "Min: " << formatTime(minProcessingTime(metrics)) << endl;
-    cout << "Max: " << formatTime(maxProcessingTime(metrics)) << endl;
+    cout << "\nTiming Statistics: (min:sec:ms)" << endl;
+    cout << std::left << std::setw(7)<< "Total: " << formatTime(totalProcessingTime(metrics)) << endl;
+    cout << std::left << std::setw(7)<< "Mean: " << formatTime(meanProcessingTime(metrics)) << endl;
+    cout << std::left << std::setw(7)<< "Min: " << formatTime(minProcessingTime(metrics)) << endl;
+    cout << std::left << std::setw(7)<< "Max: " << formatTime(maxProcessingTime(metrics)) << endl;
 }
 
 void printPerClassAccuracy(
@@ -61,7 +61,8 @@ void printPerClassAccuracy(
     std::vector<double> accuracies = allClassAccuracies(metrics);
     
     for (size_t i = 0; i < accuracies.size(); i++) {
-        cout << std::setw(12) << class_names[i] << ": " 
+        std::string label = class_names[i] + ": ";
+        cout << std::left << std::setw(12) << label 
              << std::fixed << std::setprecision(2)
              << (accuracies[i] * 100.0) << "%" << endl;
     }
@@ -78,7 +79,7 @@ void printClassificationReport(
         cout << "\nCLASSIFICATION RESULTS " << endl;
     }
 
-    cout << "Total samples: " << metrics.total_samples << endl;
+    cout << "Total samples:    " << metrics.total_samples << endl;
     cout << "Overall Accuracy: " << std::fixed << std::setprecision(2)
          << (totalAccuracy(metrics) * 100.0) << "%" << endl;
     
@@ -140,14 +141,14 @@ void saveClassificationRecap(
     outfile << "Correct:           " << metrics.correct_predictions << std::endl;
     outfile << "Overall Accuracy:  " << std::fixed << std::setprecision(2)
                                      << totalAccuracy(metrics) * 100.0 << "%" << std::endl;
-    outfile << "Total time:        " << totalProcessingTime(metrics) << std::endl;
+    outfile << "Total time:        " << formatTime(totalProcessingTime(metrics)) << std::endl;
     
     outfile << std::endl;
-    outfile << "Processing Time Statistics (ms)" << std::endl;
-    outfile << "Mean time:         " << meanProcessingTime(metrics) << std::endl;
-    outfile << "Min time:          " << minProcessingTime(metrics) << std::endl;
-    outfile << "Max time:          " << maxProcessingTime(metrics) << std::endl;
-    outfile << "Total time:        " << totalProcessingTime(metrics) << std::endl;
+    outfile << "Processing Time Statistics: (min:sec:ms)" << std::endl;
+    outfile << "Mean time:         " << formatTime(meanProcessingTime(metrics)) << std::endl;
+    outfile << "Min time:          " << formatTime(minProcessingTime(metrics)) << std::endl;
+    outfile << "Max time:          " << formatTime(maxProcessingTime(metrics)) << std::endl;
+    outfile << "Total time:        " << formatTime(totalProcessingTime(metrics)) << std::endl;
     
     outfile << std::endl;
     outfile << "Per-class Accuracy:" << std::endl;
@@ -180,6 +181,6 @@ void saveClassificationRecap(
         
     outfile.close();
     
-    cout << "\n[" << algorithm_name << "] Classification recap saved to: " 
-         << output_filename << endl;
+    cout << "\n" << algorithm_name << " Classification recap saved to: " 
+         << output_filename << "\n" << endl;
 }

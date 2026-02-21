@@ -125,11 +125,16 @@ int main(int argc, char *argv[])
     // Create results directory if it doesn't exist
     fs::path output_dir = "../results";
 
+    cout << "\nChecking output directory: " << output_dir.string() << endl;
     if (!fs::exists(output_dir)) {
         fs::create_directory(output_dir);
-        cout << "Created output directory: " << output_dir.string() << endl;
+        cout << "\nCreated output directory: " << output_dir.string() << endl;
+        if (!fs::exists(output_dir)) {
+            cerr << "\nFailed to create output directory: " << output_dir.string() << endl;
+            return 1;
+        }
     } else {
-        cout << "Output directory already exists: " << output_dir.string() << endl;
+        cout << "\nOutput directory already exists: " << output_dir.string() << endl;
     }
 
 
@@ -165,11 +170,11 @@ int main(int argc, char *argv[])
   
     // Processing - HOG --> Francesco
   
-    // hog(test_images, train_healthy_images, train_diseased_images);
+    hog(test_images, train_healthy_images, train_diseased_images);
   
     // Processing - BOW --> Francesco
   
-    // bow(test_images, train_healthy_images, train_diseased_images);
+    bow(test_images, train_healthy_images, train_diseased_images);
 
     return 0;
 }
