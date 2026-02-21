@@ -192,10 +192,10 @@ void template_match(
         // cout << "image " << image.name() << " prediction: " << flowerTypeToString(predicted_type) << endl;
     }
 
-    printClassificationReport(tm_metrics, class_names, "Template Match");
+    printClassificationReport(tm_metrics, class_names, "Template Matching");
     // Save classification recap to file
-    fs::path records_path {output_dir / "sift_recap.txt"};
-    saveClassificationRecap(tm_class_records, tm_metrics, class_names, "SIFT", records_path.string());
+    fs::path records_path {output_dir / "tm_recap.txt"};
+    saveClassificationRecap(tm_class_records, tm_metrics, class_names, "TM", records_path.string());
 
     success = true;
 }
