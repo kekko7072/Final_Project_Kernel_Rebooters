@@ -12,17 +12,11 @@
 #include <preprocessing.hpp>
 #include <template_match.hpp>
 #include <matching.h>
-
-#include "sift.h"
-#include "sift_processing.h"
-#include "print_stats.h"
-#include "metrics.h"
-#include "orb.h"
-#include "orb_processing.h"
+#include <sift_processing.h>
+#include <orb_processing.h>
 
 #ifdef ENABLE_SURF
-#include "surf.h"
-#include "surf_processing.h"
+#include <surf_processing.h>
 #endif
 
 namespace fs = std::filesystem;
