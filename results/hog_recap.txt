@@ -1,0 +1,98 @@
+HOG - Classification Results
+
+Filename              True Class        Predicted Class   
+-------------------------------------------------------------
+roses_test_8          Rose              Tulip              X
+roses_test_12         Rose              Dandelion          X
+roses_test_10         Rose              Tulip              X
+roses_test_11         Rose              Daisy              X
+roses_test_2          Rose              Dandelion          X
+roses_test_3          Rose              Dandelion          X
+roses_test_9          Rose              Dandelion          X
+roses_test_1          Rose              Rose               V
+roses_test_4          Rose              Daisy              X
+roses_test_5          Rose              Dandelion          X
+roses_test_7          Rose              Dandelion          X
+roses_test_6          Rose              Dandelion          X
+sunflower_test_8      Sunflower         Daisy              X
+sunflower_test_12     Sunflower         Sunflower          V
+sunflower_test_9      Sunflower         Dandelion          X
+sunflower_test_11     Sunflower         Dandelion          X
+sunflower_test_7      Sunflower         Daisy              X
+sunflower_test_10     Sunflower         Sunflower          V
+sunflower_test_2      Sunflower         Tulip              X
+sunflower_test_3      Sunflower         Dandelion          X
+sunflower_test_1      Sunflower         Dandelion          X
+sunflower_test_4      Sunflower         Dandelion          X
+sunflower_test_5      Sunflower         Dandelion          X
+sunflower_test_6      Sunflower         Dandelion          X
+daisy_test_8          Daisy             Daisy              V
+daisy_test_12         Daisy             Tulip              X
+daisy_test_9          Daisy             Dandelion          X
+daisy_test_11         Daisy             Dandelion          X
+daisy_test_10         Daisy             Dandelion          X
+daisy_test_7          Daisy             Tulip              X
+daisy_test_6          Daisy             Dandelion          X
+daisy_test_4          Daisy             Dandelion          X
+daisy_test_5          Daisy             Dandelion          X
+daisy_test_1          Daisy             Tulip              X
+daisy_test_2          Daisy             Daisy              V
+daisy_test_3          Daisy             Tulip              X
+no_flower_test_1      NoFlower          Dandelion          X
+no_flower_test_3      NoFlower          Daisy              X
+no_flower_test_2      NoFlower          Daisy              X
+no_flower_test_4      NoFlower          Daisy              X
+dandelion_test_11     Dandelion         Tulip              X
+dandelion_test_12     Dandelion         Dandelion          V
+dandelion_test_6      Dandelion         Daisy              X
+dandelion_test_8      Dandelion         Dandelion          V
+dandelion_test_2      Dandelion         Dandelion          V
+dandelion_test_3      Dandelion         Dandelion          V
+dandelion_test_1      Dandelion         Dandelion          V
+dandelion_test_4      Dandelion         Tulip              X
+dandelion_test_5      Dandelion         Tulip              X
+dandelion_test_7      Dandelion         Dandelion          V
+dandelion_test_10     Dandelion         Dandelion          V
+dandelion_test_9      Dandelion         Dandelion          V
+tulip_test_8          Tulip             Tulip              V
+tulip_test_12         Tulip             Tulip              V
+tulip_test_9          Tulip             Tulip              V
+tulip_test_10         Tulip             Rose               X
+tulip_test_11         Tulip             Rose               X
+tulip_test_7          Tulip             Tulip              V
+tulip_test_6          Tulip             Dandelion          X
+tulip_test_4          Tulip             Tulip              V
+tulip_test_1          Tulip             Tulip              V
+tulip_test_5          Tulip             Dandelion          X
+tulip_test_2          Tulip             Tulip              V
+tulip_test_3          Tulip             Dandelion          X
+-------------------------------------------------------------
+
+Summary:
+Total samples:     64
+Correct:           20
+Overall Accuracy:  31.25%
+Total time:        113.06
+
+Processing Time Statistics (ms)
+Mean time:         1.77
+Min time:          1.73
+Max time:          2.01
+Total time:        113.06
+
+Per-class Accuracy:
+Daisy:             16.67%
+Dandelion:         66.67%
+Rose:              8.33%
+Sunflower:         16.67%
+Tulip:             58.33%
+NoFlower:          0.00%
+
+Confusion Matrix:
+            Daisy       Dandelion   Rose        Sunflower   Tulip       NoFlower    
+Daisy       2           6           0           0           4           0           
+Dandelion   1           8           0           0           3           0           
+Rose        2           7           1           0           2           0           
+Sunflower   2           7           0           2           1           0           
+Tulip       0           3           2           0           7           0           
+NoFlower    3           1           0           0           0           0           
