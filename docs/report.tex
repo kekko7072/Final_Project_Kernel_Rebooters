@@ -24,8 +24,9 @@
 	\maketitle
 	
 	\section{Introduction}
-	The overall goal of this project is to build a complete computer vision pipeline that can
-	classify flower images and support performance evaluation across different feature-based
+	The overall goal of this project is to build a complete Computer Vision pipeline that can
+	classify flower images - without the use of deep learning methods - and that can support
+	performance evaluation across different feature-based
 	approaches. In practical terms, the system is designed around a clear
 	workflow: images are loaded from a structured dataset, visual descriptors are extracted,
 	test images are compared against training references, and final predictions are produced.
@@ -41,7 +42,23 @@
 	experimental results.
 
 	\section{Preprocessing}
-	\textit{TODO}
+	The preprocessing steps are implemented in the \texttt{main} function:
+	\begin{itemize}
+		\item Command line parsing: a \texttt{cv::CommandLineParser} is created. If a path to a valid dataset was not provided as a command line argument, the default relative path \texttt{../Final_project_proposal/} is used.
+		\item Validation of the dataset path: the main function check that the data path is valid, i.e. non-empty and containg the subdirectories "test_photos", "train_healthy_photos" and "train_diseased_photos".
+		\item Loading test and train images: the \texttt{loadImages} function is responsible for loading the images from the dataset, and store them in custom \texttt{FlowerImageContainer} objects.
+		\item Loading of template images: the \texttt{loadTemplates} function is responsible for loading the template images used by the Template Matching classifier.
+		\item Results directory creation: the main function creates the output directory where the results of each classifier will be stored, if it does not exist yet.
+	\end{itemize}
+
+	\subsection{Custom data types}
+	Custom classes \texttt{FlowerImage}, \texttt{FlowerImageContainer}, and \texttt{FlowerTemplate} (derived from FlowerImage) are used to store the images and their associated metadata.
+
+	A FlowerImage object stores two \texttt{cv::Mat} objects, with both the BGR color version and the single-channel grayscale version of the image, together with some metadata extracted from the image filename and location within the dataset.
+
+	A FlowerImageContainer object stores a vector of FlowerImage objects, and keeps a record of which FlowerImage elements belong to any of the possible types of \texttt{FlowerType}, so that it can return a vector of only those elements of a certain flower class in the \texttt{getImagesByFlowerType} function (time complexity O(n), where n is the number of images returned).
+
+	A FlowerTemplate object is a specialization of the FlowerImage class, in that it stores a template (BGR color image) and its associated mask (single-channel grayscale image).
 
 	\section{SIFT}
 	\subsection{Code Structure Decision}
@@ -343,7 +360,7 @@
 	\end{itemize}
 
 	\section{Template Matching}
-	\textit{TODO}
+
 
 	\section{HOG}
 	\subsection{Objective}
