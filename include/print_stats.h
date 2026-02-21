@@ -19,6 +19,9 @@ void printConfusionMatrix(
     const std::vector<std::string>& class_names
 );
 
+// Helper function to format time in mm:ss:ms
+static std::string formatTime(double milliseconds);
+
 // Print classification statistics
 void printClassificationReport(
     const Metrics& metrics,
