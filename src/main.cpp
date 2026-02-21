@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     cout << "Templates loaded successfully!" << endl;
 
     // Create results directory if it doesn't exist
-    fs::path output_dir = "../results";
+    const fs::path output_dir {"../results"};
 
     cout << "\nChecking output directory: " << output_dir.string() << endl;
     if (!fs::exists(output_dir)) {
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
     template_match(
         test_images,
         daisy_templates, dandelion_templates, rose_templates, sunflower_templates, tulip_templates,
+        output_dir,
         tm_success
     );
 

@@ -2,6 +2,7 @@
 #ifndef TEMPLATE_MATCH_HPP
 #define TEMPLATE_MATCH_HPP
 
+#include <filesystem>
 #include <flower_image_container.hpp>
 #include <flower_template.hpp>
 
@@ -29,6 +30,7 @@ void template_match(
     const std::vector<FlowerTemplate>& rose_templates,
     const std::vector<FlowerTemplate>& sunflower_templates,
     const std::vector<FlowerTemplate>& tulip_templates,
+    const std::filesystem::path output_dir,
     bool& success
 );
 
