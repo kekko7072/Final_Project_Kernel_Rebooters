@@ -21,6 +21,7 @@
  * `success` shared variable upon successful completion (or failure).
  *
  * @param test_images Test images as loaded by `loadImages()`
+ * @param output_dir where to store the Classification Recap file
  * @param success shared variable to comunicate exit status to parent thread
  */
 void template_match(
@@ -34,6 +35,12 @@ void template_match(
     bool& success
 );
 
+/**
+ * @brief Compares a set of templates (of the same flower class) with the given image
+ * @param image a suitable image (size must be greater than that of the templates)
+ * @param templates as loaded by `loadTemplates()`
+ * @return the highest similarity score achieved
+ */
 double processImage(
     const cv::Mat_<cv::Vec3b> image,
     const std::vector<FlowerTemplate>& templates
