@@ -45,11 +45,11 @@
 	\section{Preprocessing}
 	The preprocessing steps are implemented in the \texttt{main} function:
 	\begin{itemize}
-		\item Command line parsing: a \texttt{cv::CommandLineParser} is created. If a path to a valid dataset was not provided as a command line argument, the default relative path \texttt{../Final_project_proposal/} is used.
-		\item Validation of the dataset path: the main function check that the data path is valid, i.e. non-empty and containg the subdirectories "test_photos", "train_healthy_photos" and "train_diseased_photos".
+		\item Command line parsing: a \texttt{cv::CommandLineParser} is created. If a path to a valid dataset was not provided as a command line argument, the default relative path \\ \mbox{\texttt{../Final\_project\_proposal/}} is used.
+		\item Validation of the dataset path: the \texttt{main} function checks that the data path is valid, i.e. non-empty and containg the subdirectories "test\_photos", "train\_healthy\_photos" and "train\_diseased\_photos".
 		\item Loading test and train images: the \texttt{loadImages} function is responsible for loading the images from the dataset, and store them in custom \texttt{FlowerImageContainer} objects.
 		\item Loading of template images: the \texttt{loadTemplates} function is responsible for loading the template images used by the Template Matching classifier.
-		\item Results directory creation: the main function creates the output directory where the results of each classifier will be stored, if it does not exist yet.
+		\item Results directory creation: the \texttt{main} function creates the output directory where the results of each classifier will be stored, if it does not exist yet.
 	\end{itemize}
 
 	\subsection{Custom data types}
@@ -147,7 +147,7 @@
 		For very large datasets (thousands of images per class), this could exceed available memory. 
 		A potential mitigation would be descriptor subsampling or clustering-based aggregation.
 		\item \textbf{Exhaustive matching}: Each test descriptor is matched against all training 
-		descriptors for a given class. This scales as \(O(N_{test} \times N_{train})\). FLANN provides 
+		descriptors for a given class. This scales as \(O(N_{test} \times N_{train})\). FLANN provides
 		partial relief.
 	\end{itemize}
 
@@ -286,7 +286,7 @@
 		\item Classify as the class with maximum good matches.
 	\end{enumerate}
 
-	Using the same threshold parameter \(\tau\) across SIFT and SURF allows for direct comparison, 
+	Using the same threshold parameter \(\tau\) across SIFT and SURF allows for direct comparison,
 	though optimal threshold values may differ between the two algorithms due to differences in 
 	descriptor distance distributions.
 
@@ -361,37 +361,37 @@
 	\end{itemize}
 
 	\section{Template Matching}
-	The Template Matching methods uses hand-picked template images (5 out of the 15 train healthy images available for every flower class) to classify the test images using the standard \texttt{cv::matchTemplate} function.
+	The Template Matching method uses hand-picked template images (5 out of the 15 train healthy images available for every flower class) to classify the test images using the standard \texttt{cv::matchTemplate} function.
 
 	Template Matching relies of a simple idea: slide the template over one test image, and compute a similarity score for each relative position between the template and the image.
 	Depending on the similarity score chosen (OpenCV provides several options), the minimum or maximun score achieved will correspond to the best match between template and image.
 
 	\subsection{Code Structure Decision}
-	Template Matching logis is split into:
+	Template Matching logic is split into:
 	\begin{itemize}
-		\item \texttt{processImage} function: compares one test images with one set of templates (of one the classes)
-		\item \texttt{template_match} function: complete wrapper of the Template Matching routine, iterates over all test images and compares similarity scores achieved with different classes to assign a final prediction
+		\item \texttt{processImage} function: compares one test images with one set of templates (of one of the classes)
+		\item \texttt{template\_match} function: complete wrapper of the Template Matching routine, iterates over all test images and compares similarity scores achieved with different classes to assign a final prediction
 	\end{itemize}
 
 	\subsection{Feature Extraction Choices}
-	Since the Template Matching methods is heavily dependent on the size of both the template and the image been processed, and since templates images within each class have different sizes, all template images and associated masks are resize, with \texttt{cv::resize}, to a size of 400x300.
+	Since the Template Matching method is heavily dependent on the size of both the template and the image been processed, and since templates images within each class have different sizes, all template images and associated masks are resized, with \texttt{cv::resize}, to a size of 400x300.
 	This step is necessary to allow comparison of matching scores between templates, as the use of templates of different sizes would lead to matching scores being not normalized.
 
 	To improve classification, every test image is processed twice, in two different sizes (1200x900 and 800x600), and the best matching score for every class is kept.
 
 	\subsection{Matching Choices}
-	The \texttt{cv::matchTemplate} function allows a mask to be specified only if either TM_SQDIFF or TM_CCORR_NORMED are used as similarity scores.
+	The \texttt{cv::matchTemplate} function allows a mask to be specified only if either TM\_SQDIFF or TM\_CCORR\_NORMED are used as similarity scores.
 
-	Both similarity scores lead to similar classification results with our setup, so the TM_CCORR_NORMED (normalized cross-correlation) score was chosen.
+	Both similarity scores lead to similar classification results with our setup, so the TM\_CCORR\_NORMED (normalized cross-correlation) score was chosen.
 
 	\subsection{Robustness Choices}
 	\begin{itemize}
-		\item Empty input image check in \texttt{template_match(...)}.
+		\item Empty input image check in \texttt{template\_match(...)}.
 		\item Empty input template or mask in \texttt{processImage(...)}
 	\end{itemize}
 
 	\subsection{Trade-off}
-	The implementation is intentionally simple and readable, with time complexity \(O(N_{test} \cdot N_{template_per_class} \cdot N_{classes})\).
+	The implementation is intentionally simple and readable, with time complexity \(O(N_{test} \cdot N_{template\_per\_class} \cdot N_{classes})\).
 
 	\section{HOG}
 	\subsection{Objective}
@@ -886,7 +886,7 @@
 	The project workload was distributed among team members in the following way:
 	\begin{itemize}
 		\item Marco Carraro: SIFT, SURF, ORB and metrics system.
-		\item Luca Pellegrini: preprocessing pipeline image container infrastructure, template matching.
+		\item Luca Pellegrini: preprocessing pipeline, image container infrastructure, template matching.
 		\item Francesco Vezzani: HOG and BoW implementation, matching wrappers,
 	\end{itemize}
 
@@ -898,7 +898,7 @@
 	\toprule
 	\textbf{Hours worked} & \textbf{Marco Carraro} & \textbf{Luca Pellegrini} & \textbf{Francesco Vezzani} \\ 
 	\midrule
-	\textbf{Total} & \textbf{$\sim$40} & \textbf{XX} & \textbf{$\sim$20} \\
+	\textbf{Total} & \textbf{$\sim$40} & \textbf{$\sim$40} & \textbf{$\sim$20} \\
 	\bottomrule
 	\end{tabular}
 	\caption{Approximate hours worked per team member}
