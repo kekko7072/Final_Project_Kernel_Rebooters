@@ -21,7 +21,7 @@ SURFExtractor::SURFExtractor(
         upright
     );
 
-    // Initialize the BFMacher with L2 distance
+    // Use FLANN-based matcher for SURF descriptors
     matcher_ = cv::FlannBasedMatcher::create();
 }
 

@@ -12,7 +12,7 @@ ORBExtractor::ORBExtractor(
     int firstLevel,
     int WTA_K,
     int patchSize
-) : extractionTime_(0.0), keypointCount_(0) {
+) : extractionTime_(0.0), keypointCount_(0), matchingTime_(0.0) {
     orb_ = cv::ORB::create(
         nfeatures,
         scaleFactor,
@@ -24,7 +24,7 @@ ORBExtractor::ORBExtractor(
         patchSize
     );
 
-    // Initialize the BFMacher with L2 distance
+    // Initialize the BFMatcher with Hamming distance for ORB descriptors
     matcher_ = cv::BFMatcher::create(cv::NORM_HAMMING, false);
 }
 

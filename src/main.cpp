@@ -17,6 +17,8 @@
 #include "sift_processing.h"
 #include "print_stats.h"
 #include "metrics.h"
+#include "orb.h"
+#include "orb_processing.h"
 
 #ifdef ENABLE_SURF
 #include "surf.h"
@@ -120,52 +122,33 @@ int main(int argc, char *argv[])
     }
     cout << "Templates loaded successfully!" << endl;
 
-    // class_names = {"Daisy", "Dandelion", "Rose", "Sunflower", "Tulip", "NoFlower"}
+    // Create results directory if it doesn't exist
+    fs::path output_dir = "../results";
+
+    if (!fs::exists(output_dir)) {
+        fs::create_directory(output_dir);
+        cout << "Created output directory: " << output_dir.string() << endl;
+    } else {
+        cout << "Output directory already exists: " << output_dir.string() << endl;
+    }
+
 
     // Processing - SIFT --> Marco
-
-    SIFTExtractor sift;
-
-    Metrics sift_metrics = createMetrics(6);
-
-    std::map<FlowerType, cv::Mat> sift_train_descriptors;
-    
-    // Train SIFT
-    trainSIFT(train_healthy_images, train_diseased_images, sift, sift_train_descriptors, class_names, true);
-    
-    // Test SIFT
-    double sift_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
-    testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, true);
-    
-    // Display results
-    printClassificationReport(sift_metrics, class_names, "SIFT");
+    sift(test_images, train_healthy_images, train_diseased_images, output_dir.string());
 
 
     // Processing - SURF --> Marco
-    
     #ifdef ENABLE_SURF
     {
-        cout << "\n\n====================\n" << endl;
-        
-        SURFExtractor surf;
-
-        Metrics surf_metrics = createMetrics(6);
-
-        std::map<FlowerType, cv::Mat> surf_train_descriptors;
-
-        // Train SURF
-        trainSURF(train_healthy_images, train_diseased_images, surf, surf_train_descriptors, class_names, true);
-        
-        // Test SURF
-        double surf_threshold = 2.5;  // Can be tuned (higher = stricter, lower = more matches)
-        testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, true);
-        
-        // Display results
-        printClassificationReport(surf_metrics, class_names, "SURF");
+        surf(test_images, train_healthy_images, train_diseased_images, output_dir.string());
     } 
     #else
         cout << "\nSURF is disabled. To enable, recompile with -DCONFIG_ENABLE_SURF=ON \n" << endl;
     #endif
+
+    
+    // Processing - ORB --> Marco
+    orb(test_images, train_healthy_images, train_diseased_images, output_dir.string());
     
     // Processing - Template Matching --> Luca
     bool tm_success {false};
@@ -182,11 +165,11 @@ int main(int argc, char *argv[])
   
     // Processing - HOG --> Francesco
   
-    hog(test_images, train_healthy_images, train_diseased_images);
+    // hog(test_images, train_healthy_images, train_diseased_images);
   
     // Processing - BOW --> Francesco
   
-    bow(test_images, train_healthy_images, train_diseased_images);
+    // bow(test_images, train_healthy_images, train_diseased_images);
 
     return 0;
 }

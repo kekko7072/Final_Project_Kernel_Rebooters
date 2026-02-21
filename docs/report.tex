@@ -39,13 +39,303 @@
 	\textit{TODO}
 
 	\section{SIFT}
-	\textit{TODO}
+	\subsection{Code Structure Decision}
+	SIFT logic is organized into:
+	\begin{itemize}
+		\item \texttt{SIFTExtractor} (\texttt{include/sift.h}, \texttt{src/sift.cpp}) for 
+		low-level feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{sift\_processing} module (\texttt{include/sift\_processing.h}, 
+		\texttt{src/sift\_processing.cpp}) for dataset-level training and testing workflows.
+	\end{itemize}
+
+	This separation maintains architectural consistency with other modules: the extractor class 
+	handles algorithmic operations while the processing module orchestrates dataset traversal, 
+	descriptor aggregation, and prediction logic. As a result, \texttt{main.cpp} remains focused 
+	on high-level coordination, and the SIFT components can be independently tested, optimized, or replaced.
+
+	The \texttt{SIFTExtractor} interface exposes essential operations: \texttt{extract(...)}, 
+	\texttt{matchDescriptors(...)}, \texttt{filterMatches(...)}, and \texttt{matchAndFilter(...)}. 
+	Timing instrumentation is included to support performance analysis during development and evaluation phases.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are in grayscale to focus on gradient information rather than 
+		color variation.
+		\item SIFT parameters use OpenCV defaults with optional tuning: configurable number of features, 
+		octave layers, contrast threshold, edge threshold, and Gaussian sigma.
+		\item The default configuration (\texttt{nfeatures=0}) extracts all detected keypoints, providing 
+		maximum detail for the training phase.
+	\end{itemize}
+
+	The decision to use grayscale processing aligns with SIFT's design philosophy: the algorithm was 
+	originally developed for intensity-based matching, and color information typically adds minimal 
+	discriminative value while increasing computational cost.
+
+	\subsection{Training Pipeline}
+	The training workflow follows a clear sequence:
+	\begin{enumerate}
+		\item Extract SIFT descriptors from all healthy and diseased (if \texttt{use\_diseased} flag is set) training images.
+		\item Aggregate descriptors per class using vertical concatenation (\texttt{cv::vconcat}).
+		\item Store the combined descriptor matrices in a class-indexed map for efficient test-time retrieval.
+	\end{enumerate}
+
+	This pipeline choice reflects a bag-of-features approach: all descriptors from a given class 
+	are pooled together without explicit spatial structure. The rationale is simplicity and robustness
+	the classifier relies on the statistical distribution of local features rather than their precise 
+	geometric arrangement.
+
+	An important implementation detail is the use of \texttt{cv::vconcat} for descriptor combination, 
+	which is significantly faster than iterative concatenation and produces a single contiguous memory 
+	block per class.
+
+	\subsection{Matching and Classification Strategy}
+	For each test image:
+	\begin{enumerate}
+		\item Extract SIFT descriptors.
+		\item Match against each class's descriptor pool using FLANN-based matching.
+		\item Filter matches based on distance threshold: \( d_{match} < threshold \times d_{min} \).
+		\item Classify as the class with the maximum number of good matches.
+	\end{enumerate}
+
+	\subsection{Matcher Configuration}
+	Two matcher implementations were tested:
+	\begin{itemize}
+		\item \texttt{BFMatcher} with L2 norm: exhaustive search, guaranteed optimal matches, but 
+		slower for large descriptor sets (around 25 minutes for a classification).
+		\item \texttt{FlannBasedMatcher}: approximate nearest neighbor search using KD-trees, 
+		significantly faster with same accuracy (around 5 minutes for a classification).
+	\end{itemize}
+
+	The FLANN matcher was selected as the default after benchmarking showed 5x speedup with 
+	negligible impact on classification accuracy for this dataset.
+
+	\subsection{Robustness Choices}
+	\begin{itemize}
+		\item Empty image check before extraction with early return and error message.
+		\item Empty descriptor validation before matching operations.
+		\item Graceful handling of images with zero detected keypoints (skipped in testing loop).
+		\item Timing instrumentation for extraction and matching phases to identify performance bottlenecks.
+	\end{itemize}
+
+	\subsection{Performance Considerations}
+	The implementation includes several deliberate trade-offs:
+	\begin{itemize}
+		\item \textbf{Descriptor aggregation}: All training descriptors are stored in memory. 
+		For very large datasets (thousands of images per class), this could exceed available memory. 
+		A potential mitigation would be descriptor subsampling or clustering-based aggregation.
+		\item \textbf{Exhaustive matching}: Each test descriptor is matched against all training 
+		descriptors for a given class. This scales as \(O(N_{test} \times N_{train})\). FLANN provides 
+		partial relief.
+	\end{itemize}
+
+	These trade-offs were chosen to maintain code clarity and establish a functional baseline before 
+	introducing more complex optimization strategies.
+
+	\subsection{Tested Configurations}
+	Several parameters were evaluated during development:
+	\begin{itemize}
+		\item \textbf{Use of diseased descriptors}: Including diseased training samples improved 
+		classification accuracy.
+		\item \textbf{Distance threshold}: Values between 1.5 and 2.5 were tested for the ratio 
+		test-inspired filtering, with 2.0 providing a good balance between precision and recall.
+		\item \textbf{Matcher choice}: FLANN-based matching provided a significant speedup with 
+		no loss in accuracy compared to brute-force matching.
+		\item \textbf{Nearest Neighbor Distance Ratio}: The original Lowe's ratio test was implemented 
+		but found to be too restrictive for this dataset, leading to very few matches. 
+		The distance-based thresholding approach provided a more flexible filtering mechanism that 
+		retained more valid matches while still reducing false positives.
+		\item \textbf{Limits in train descriptor}: To mitigate the number of descriptors difference 
+		between classes, a maximum number of descriptors per class was tested (first 15000, then 30000). 
+		The sampling of those descriptors was done in multiple ways: random sampling, uniform sampling 
+		and k-means clustering. The best results were obtained with random sampling but this method was 
+		not consistent across runs. The other methods did not provide any improvement in accuracy and, 
+		expecially k-means was very time consuming. At the end, there is non limit on the number of train 
+		descriptors.
+	\end{itemize}
+
+	The final configuration selected for the evaluation phase was FLANN-based matching with a distance 
+	threshold of 1.7 (better in vlab simulation) and no limit on the number of training descriptors, as this provided the best overall 
+	accuracy while maintaining reasonable processing time.
+
+	In the table below (see Table \ref{tab:SIFT_results}), the results of the different tested configurations 
+	are reported, showing the impact of each parameter choice on both accuracy and processing time. 
+	Those tests has been performed on pc, not on vlab.
+	
+	\begin{table}[H]
+		\centering
+		\medskip
+		\resizebox{\textwidth}{!}{
+			\begin{tabular}{llccclccccccc}
+				\toprule
+				\textbf{Matcher} & \textbf{Dataset} & \textbf{Thresh.} & \textbf{Train Descriptor} & \textbf{Time} & \textbf{Acc.} & \textbf{Daisy} & \textbf{Dand.} & \textbf{Rose} & \textbf{Sunf.} & \textbf{Tulip} & \textbf{NoFl.} \\
+				\midrule 
+				BF & Full & 2,5 & NULL & 26:15:996 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+				BF & Healthy & 2,5 & NULL & 03:04:159 & 15,63\% & 8,33\% & 41,67\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+				FLANN & Full & 2,5 & NULL & 06:54:950 & 20,31\% & 0,00\% & 41,67\% & 8,33\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 2,0 & NULL & 05:25:163 & 23,44\% & 8,33\% & 41,67\% & 16,67\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 2,5 & 15k (rnd sample) & 04:17:885 & 20,31\% & 0,00\% & 33,33\% & 8,33\% & 25,00\% & 41,67\% & 0,00\% \\
+				FLANN & Full & 1,5 & 15k (rnd sample) & 03:57:923 & 25,00\% & 16,67\% & 41,67\% & 8,33\% & 33,33\% & 33,33\% & 0,00\% \\
+				FLANN & Full & 1,5 & NULL & 05:29:062 & 18,75\% & 16,67\% & 33,33\% & 8,33\% & 25,00\% & 16,67\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,8 & NULL & 05:33:180 & 17,19\% & 25,00\% & 16,67\% & 8,33\% & 16,67\% & 25,00\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & NULL & 05:23:491 & 23,44\% & 33,33\% & 33,33\% & 0,00\% & 16,67\% & 41,67\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & 15k (unif sample) & 02:59:029 & 20,31\% & 41,67\% & 16,67\% & 8,33\% & 33,33\% & 8,33\% & 0,00\% \\
+				FLANN+NNDR & Full & 0,7 & 15k (k-means) & $>$30' train & 18,75\% & 41,67\% & 25,00\% & 0,00\% & 25,00\% & 8,33\% & 0,00\% \\
+				FLANN & Full & 2,0 & 30k (unif sample) & 04:02:434 & 20,31\% & 8,33\% & 41,67\% & 8,33\% & 25,00\% & 25,00\% & 0,00\% \\
+				\bottomrule
+			\end{tabular}
+			}
+		\caption{SIFT performance evaluation}
+		\label{tab:SIFT_results}
+	\end{table}
 
 	\section{SURF}
-	\textit{TODO}
+	\subsection{Code Structure Decision}
+	SURF logic follows the same architectural pattern established for SIFT:
+	\begin{itemize}
+		\item \texttt{SURFExtractor} (\texttt{include/surf.h}, \texttt{src/surf.cpp}) for low-level 
+		feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{surf\_processing} module (\texttt{include/surf\_processing.h}, 
+		\texttt{src/surf\_processing.cpp}) for dataset-level training and testing workflows.
+	\end{itemize}
+
+	This parallel structure serves multiple purposes: it maintains consistency across the codebase, 
+	allows direct code comparison between SIFT and SURF implementations in \texttt{main.cpp}.
+
+	The \texttt{SURFExtractor} interface mirrors \texttt{SIFTExtractor}, exposing: \texttt{extract(...)},\\
+	\texttt{matchDescriptors(...)}, \texttt{filterMatches(...)}, and \texttt{matchAndFilter(...)}. 
+	This symmetry was a deliberate design decision to reduce cognitive load when working with multiple 
+	feature extractors and to facilitate comparative analysis.
+
+	\subsection{Conditional Compilation}
+	A critical implementation detail is that SURF support is optional and controlled through the 
+	\texttt{ENABLE\_SURF} preprocessor flag. This is necessary because SURF is part of OpenCV's 
+	\texttt{xfeatures2d} module, which requires separate installation and is not included in 
+	OpenCV's default distribution due to patent restrictions.
+
+	The conditional compilation pattern is implemented using:
+	\begin{verbatim}
+		#ifdef ENABLE_SURF
+		// SURF implementation
+		#endif // ENABLE_SURF
+	\end{verbatim}
+
+	This approach allows the project to compile and run without SURF when \texttt{xfeatures2d} 
+	is unavailable, while still supporting it when the module is properly installed. Users can 
+	enable SURF by configuring CMake with \texttt{-DCONFIG\_ENABLE\_SURF=ON}.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are used in grayscale, consistent with SURF's original design 
+		for intensity-based features.
+		\item SURF parameters use sensible defaults: Hessian threshold 400.0, 4 octaves, 3 
+		octave layers.
+		\item The \texttt{extended} flag (defaulting to \texttt{false}) controls descriptor 
+		dimensionality: 64 dimensions for standard SURF, 128 for extended SURF.
+		\item The \texttt{upright} flag (defaulting to \texttt{false}) determines rotation 
+		invariance: when false, descriptors are rotation-invariant but computationally more expensive.
+	\end{itemize}
+
+	The Hessian threshold is the primary parameter controlling the number of detected keypoints. 
+	Higher values detect fewer but more distinctive keypoints, while lower values increase keypoint 
+	count at the cost of potentially including less stable features. 
+	The default is set to 100.0 but it has been increased to 400.0 to reduce the number of keypoints, 
+	speed up processing and increasing accuracy.
+
+	\subsection{Training Pipeline}
+	The training workflow is architecturally identical to SIFT:
+	\begin{enumerate}
+		\item Extract SURF descriptors from healthy training images.
+		\item Optionally extract descriptors from diseased training images.
+		\item Aggregate descriptors per class using \texttt{cv::vconcat}.
+		\item Store combined descriptor matrices indexed by flower class.
+	\end{enumerate}
+
+	This structural equivalence was intentional, it ensures that performance differences between SIFT 
+	and SURF can be attributed solely to the feature extraction algorithm rather than implementation 
+	variations in the classification pipeline.
+
+	\subsection{Matching Strategy}
+	The matching and classification strategy is identical to SIFT:
+	\begin{enumerate}
+		\item Extract SURF descriptors from test image.
+		\item Match against each class's descriptor pool using FLANN-based matching.
+		\item Filter matches: \( d_{match} < \tau \cdot d_{min} \).
+		\item Classify as the class with maximum good matches.
+	\end{enumerate}
+
+	Using the same threshold parameter \(\tau\) across SIFT and SURF allows for direct comparison, 
+	though optimal threshold values may differ between the two algorithms due to differences in 
+	descriptor distance distributions.
 
 	\section{ORB}
-	\textit{TODO}
+	\subsection{Code Structure Decision}
+	ORB follows the established architectural pattern:
+	\begin{itemize}
+		\item \texttt{ORBExtractor} (\texttt{include/orb.h}, \texttt{src/orb.cpp}) for low-level 
+		feature extraction, descriptor matching, and match filtering operations.
+		\item \texttt{orb\_processing} module (\texttt{include/orb\_processing.h}, 
+		\texttt{src/orb\_processing.cpp}) for dataset-level training and testing workflows.
+	\end{itemize}
+
+	This structural consistency was intentional: by maintaining identical interfaces and 
+	workflows across SIFT, SURF, and ORB modules, the codebase remains maintainable and direct 
+	algorithm comparisons become straightforward. The only algorithmic differences are 
+	encapsulated within the respective extractor classes.
+
+	\subsection{Feature Extraction Choices}
+	\begin{itemize}
+		\item Input images are used in grayscale, consistent with ORB's design for binary 
+		pattern matching.
+		\item ORB parameters are set to default values apart from \texttt{nfeatures}.
+		\item \texttt{nfeatures} is set to 1500, with threshold values adjusted accordingly 
+		for optimal classification performance.
+	\end{itemize}
+
+	A critical discovery during implementation was that ORB's \texttt{nfeatures} parameter 
+	behaves fundamentally differently from SIFT's equivalent. Setting \texttt{nfeatures=0} 
+	results in no keypoint detection, whereas SIFT interprets this as "extract all detected 
+	keypoints." This behavior necessitated explicit parameter specification and careful tuning 
+	to achieve acceptable performance.
+
+	\subsection{Training Pipeline}
+	The training workflow mirrors SIFT and SURF:
+	\begin{enumerate}
+		\item Extract ORB descriptors from healthy training images.
+		\item Optionally extract descriptors from diseased training images.
+		\item Aggregate descriptors per class using vertical concatenation.
+		\item Store combined descriptor matrices indexed by flower class.
+	\end{enumerate}
+
+	This structural equivalence ensures that performance differences can be attributed solely 
+	to the feature extraction algorithm rather than implementation variations.
+
+	\subsection{Matching Strategy}
+	ORB matching follows the same high-level strategy as SIFT/SURF but with a critical 
+	difference in the underlying matcher:
+	\begin{enumerate}
+		\item Extract ORB descriptors from test image.
+		\item Match against each class's descriptor pool using BFMatcher with Hamming distance.
+		FLANN-based matching is possible using LSH (Locality Sensitive Hashing) but typically 
+		slower than BFMatcher for binary descriptors.
+		\item Filter matches: \( d_{match} < \tau \cdot d_{min} \).
+		\item Classify as the class with maximum good matches.
+	\end{enumerate}
+
+	The classification decision remains:
+	\[
+	\hat{y}(x) = \arg\max_{c} |\text{good\_matches}(x, c)|
+	\]
+
+	\subsection{Parameter Tuning Process}
+	Initial implementation with \texttt{nfeatures=0} resulted in zero keypoint detection across 
+	all images. This revealed a fundamental difference between ORB and SIFT parameter 
+	interpretation:
+
+	\begin{itemize}
+		\item SIFT: \texttt{nfeatures=0} $\rightarrow$ extract all detected keypoints 
+		\item ORB: \texttt{nfeatures=0} $\rightarrow$ extract exactly zero keypoints
+		\item \texttt{nfeatures} $\geq$ 1000 to ensure sufficient descriptor density per image
+	\end{itemize}
 
 	\section{Template Matching}
 	\textit{TODO}
@@ -203,6 +493,182 @@
 	about, and it provides a reliable baseline before introducing acceleration or more advanced
 	weighting schemes.
 
+	\section{Metrics implementation}
+	\subsection{Code Structure Decision}
+	The metrics system is organized into three components:
+	\begin{itemize}
+		\item \texttt{metrics.h/cpp} (\texttt{include/metrics.h}, \texttt{src/metrics.cpp}) for 
+		core data structures and computation functions.
+		\item \texttt{Metrics} struct as the central data container, passed by reference throughout 
+		the pipeline.
+		\item \texttt{print\_stats.h/cpp} (\texttt{include/print\_stats.h}, \texttt{src/print\_stats.cpp}) 
+		for formatted output and reporting.
+	\end{itemize}
+
+	This separation permits modular development: \texttt{metrics.cpp} handles numerical computations 
+	and data management, while \texttt{print\_stats.cpp} focuses exclusively on presentation formatting. 
+	This design makes it easy to add new output formats without modifying the core metrics logic.
+
+	\subsection{Core Data Structure}
+	The \texttt{Metrics} struct encapsulates all evaluation data:
+	\begin{verbatim}
+		struct Metrics {
+			int num_classes;
+			int total_samples;
+			int correct_predictions;
+			std::vector<std::vector<int>> confusion_matrix;
+			std::vector<double> processing_times;
+		};
+	\end{verbatim}
+
+	Key design decisions:
+	\begin{itemize}
+		\item \textbf{Confusion matrix}: Stored as \texttt{vector<vector<int>>} rather than a flat 
+		array for intuitive indexing: \texttt{confusion\_matrix[true\_class][predicted\_class]}.
+		\item \textbf{Processing times}: Stored as individual measurements rather than pre-computed 
+		aggregates, allowing flexible statistical analysis (mean, median, percentiles) without data loss.
+		\item \textbf{Counts vs rates}: Raw counts (\texttt{correct\_predictions}, \texttt{total\_samples}) 
+		are stored; accuracy is computed on-demand to avoid synchronization issues during incremental updates.
+	\end{itemize}
+
+	\subsection{Classification Record System}
+	To support detailed analysis of individual predictions, a parallel tracking system was implemented:
+
+	\begin{verbatim}
+	using ClassificationRecord = std::array<std::string, 3>;
+	using ClassificationRecap = std::vector<ClassificationRecord>;
+	\end{verbatim}
+
+	\noindent Each \texttt{ClassificationRecord} contains:
+	\begin{enumerate}
+		\item \textbf{Filename}: Original test image filename for traceability
+		\item \textbf{True class}: Ground truth label from dataset
+		\item \textbf{Predicted class}: Algorithm's classification output
+	\end{enumerate}
+
+	This structure enables post processing analysis of misclassified images, identification of systematic 
+	error patterns and comparison between algorithms behavior.
+
+	\subsection{Accuracy Computation}
+	Multiple accuracy metrics are supported:
+
+	\textbf{Overall accuracy:}
+	\[
+	\text{accuracy} = \frac{\text{correct\_predictions}}{\text{total\_samples}}
+	\]
+
+	\textbf{Per-class accuracy:}
+	\[
+	\text{accuracy}_c = \frac{\text{confusion\_matrix}[c][c]}{\sum_j \text{confusion\_matrix}[c][j]}
+	\]
+
+	Per-class accuracy is computed by dividing the diagonal element (correct predictions for class \(c\)) 
+	by the sum of the entire row (all predictions where the true class was \(c\)). This metric reveals 
+	which classes are well-distinguished and which are frequently confused.
+
+	The implementation includes proper handling of edge cases: zero-sample classes return 0.0 accuracy 
+	rather than causing division by zero.
+
+	\subsection{Timing Statistics}
+	Processing time analysis provides four key metrics:
+	\begin{itemize}
+		\item \textbf{Total time}: Sum of all per-image processing times.
+		\item \textbf{Mean time}: Average processing time per image.
+		\item \textbf{Min/Max time}: Identifies best-case and worst-case performance.
+	\end{itemize}
+
+	These metrics are computed as:
+	\[
+	\text{mean} = \frac{1}{n}\sum_{i=1}^{n} t_i
+	\]
+	\[
+	\text{min} = \min_i t_i, \quad \text{max} = \max_i t_i
+	\]
+
+	\subsection{Reporting Functions}
+	The \texttt{print\_stats} module provides hierarchical reporting:
+
+	\noindent\textbf{Component functions:}
+	\begin{itemize}
+		\item \texttt{printConfusionMatrix(...)}: Formatted confusion matrix table.
+		\item \texttt{printTimingStats(...)}: Processing time summary.
+		\item \texttt{printPerClassAccuracy(...)}: Per-class accuracy breakdown.
+	\end{itemize}
+
+	\noindent\textbf{Composite function:}
+	\begin{itemize}
+		\item \texttt{printClassificationReport(...)}: Combines all three components into a comprehensive 
+		summary with optional algorithm name header.
+	\end{itemize}
+
+	This modular structure allows flexible reporting: debugging sessions might print only timing stats 
+	while final evaluation uses the full classification report.
+
+	\subsection{File Export System}
+	The metrics system includes comprehensive file export functionality for persistent storage and offline 
+	analysis.
+	\noindent The \texttt{saveClassificationRecap} function generates a detailed text report for a single algorithm containing:
+
+	\begin{itemize}
+		\item \textbf{Per-image classification table}: Lists every test image with its true label, 
+		predicted label, and correctness indicator (V/X)
+		\item \textbf{Summary statistics}: Total samples, correct predictions, overall accuracy
+		\item \textbf{Timing analysis}: Mean, min, max, and total processing times
+		\item \textbf{Per-class accuracy}: Accuracy percentage for each flower class
+		\item \textbf{Confusion matrix}: Full confusion matrix for detailed error analysis
+	\end{itemize}
+
+	This comprehensive export ensures that all experimental results are preserved for later analysis and 
+	comparison between algorithms.
+
+
+	\subsection{Design Patterns}
+	Several design patterns enhance usability:
+
+	\noindent\textbf{Const-correctness:}
+	Query functions take \texttt{const Metrics\&} to communicate that they perform read-only operations:
+	\begin{verbatim}
+	double totalAccuracy(const Metrics& metrics);
+	\end{verbatim}
+
+	\noindent\textbf{Reference parameters:}
+	Update functions take \texttt{Metrics\&} to enable efficient in-place modification:
+	\begin{verbatim}
+	void addPrediction(Metrics& metrics, int true_class, int predicted_class);
+	\end{verbatim}
+
+	\subsection{Extensibility}
+	The metrics system is designed for easy extension:
+	\begin{itemize}
+		\item Adding new metrics: Extend the \texttt{Metrics} struct and add corresponding computation 
+		functions.
+		\item New output formats: Add new functions to \texttt{print\_stats.cpp} or create separate 
+		modules.
+		\item Comparative analysis: Multiple algorithm results can be combined for side-by-side comparison 
+		and statistical significance testing.
+	\end{itemize}
+
+	\subsection{Performance Considerations}
+	The metrics system adds minimal overhead:
+	\begin{itemize}
+		\item Per-prediction update: \(O(1)\) for counter increments and confusion matrix access.
+		\item Time recording: \(O(1)\) vector push\_back operation.
+		\item Accuracy computation: \(O(c^2)\) where \(c\) is number of classes, negligible compared to 
+		feature extraction time.
+	\end{itemize}
+
+	\subsection{Integration with Feature Extractors}
+	All feature extraction modules (SIFT, SURF, ORB, TM, HOG, BoW) use this common metrics infrastructure, 
+	ensuring:
+	\begin{itemize}
+		\item Consistent evaluation methodology across algorithms.
+		\item Comparable timing measurements (all include feature extraction through final prediction).
+		\item Uniform reporting format for easy comparison.
+	\end{itemize}
+
+	This standardization is critical for fair performance comparisons and for making informed decisions 
+	about which algorithm is best suited for the flower classification task.
+
 	\section{Flower Health Detection}
 	\textit{Section reserved for flower health detection details (to be completed).}
 
@@ -216,10 +682,37 @@
 	The latest revision further reduced complexity by removing unused state from HOG/BoW
 	extractors and retaining only the operations actually used by the pipeline.
 	
+	\section{Work Distribution}
+
+	The project workload was distributed among team members in the following way:
+	\begin{itemize}
+		\item Marco Carraro: SIFT, SURF, ORB and metrics system.
+		\item Luca Pellegrini: preprocessing pipeline image container infrastructure, template matching.
+		\item Francesco Vezzani: HOG and BoW implementation, matching wrappers,
+	\end{itemize}
+
+	All team members participated in code reviews, integration testing, and collaborative debugging sessions to ensure consistency across modules and resolve interface compatibility issues.
+	
+	\begin{table}[H]
+	\centering
+	\begin{tabular}{@{}lccc@{}}
+	\toprule
+	\textbf{Hours worked} & \textbf{Marco Carraro} & \textbf{Luca Pellegrini} & \textbf{Francesco Vezzani} \\ 
+	\midrule
+	\textbf{Total} & \textbf{$\sim$40} & \textbf{XX} & \textbf{XX} \\
+	\bottomrule
+	\end{tabular}
+	\caption{Approximate hours worked per team member}
+	
+	\end{table}
+	
 	\section*{References / Links}
 	
 	\begin{itemize}
 		\item Project repository: \url{https://github.com/kekko7072/Final_Project_Kernel_Rebooters/tree/main}
+		\item OpenCV SIFT documentation: \url{https://docs.opencv.org/4.5.4/d7/d60/classcv_1_1SIFT.html#a94ee0141f77675822e574bbd2c079811}
+		\item OpenCV SURF documentation: \url{https://docs.opencv.org/4.6.0/d5/df7/classcv_1_1xfeatures2d_1_1SURF.html}
+		\item OpenCV FlannBasedMatcher documentation: \url{https://docs.opencv.org/4.5.4/dc/de2/classcv_1_1FlannBasedMatcher.html}
 		\item OpenCV HOGDescriptor documentation: \url{https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html}
 		\item OpenCV ORB documentation: \url{https://docs.opencv.org/4.x/db/d95/classcv_1_1ORB.html}
 		\item OpenCV kmeans documentation: \url{https://docs.opencv.org/4.x/d1/d5c/tutorial_py_kmeans_opencv.html}

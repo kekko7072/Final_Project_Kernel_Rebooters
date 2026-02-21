@@ -16,6 +16,9 @@
 #include "surf.h"
 #include "metrics.h"
 
+using ClassificationRecord = std::array<std::string, 3>;
+using ClassificationRecap = std::vector<ClassificationRecord>;
+
 // Extract SURF features from a container and store them in a temporary map
 void extractSURFFeaturesFromContainer(
     const FlowerImageContainer& images,
@@ -48,7 +51,16 @@ void testSURF(
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
+    ClassificationRecap* records,
     bool verbose = true
+);
+
+// Wrapper function to run the entire SURF pipeline (training + testing)
+void surf(
+    const FlowerImageContainer& test_images,
+    const FlowerImageContainer& train_healthy,
+    const FlowerImageContainer& train_diseased,
+    const std::string& output_dir
 );
 
 #endif // ENABLE_SURF

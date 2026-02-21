@@ -1,7 +1,7 @@
 // Author: Marco Carraro
 
-#ifndef SIFT_PROCESSING_H
-#define SIFT_PROCESSING_H
+#ifndef ORB_PROCESSING_H
+#define ORB_PROCESSING_H
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -10,41 +10,41 @@
 #include "flower_type.hpp"
 #include "flower_image.hpp"
 #include "flower_image_container.hpp"
-#include "sift.h"
+#include "orb.h"
 #include "metrics.h"
 
 using ClassificationRecord = std::array<std::string, 3>;
 using ClassificationRecap = std::vector<ClassificationRecord>;
 
-// Extract SIFT features from a container and store them in a temporary map
-void extractSIFTFeaturesFromContainer(
+// Extract ORB features from a container and store them in a temporary map
+void extractORBFeaturesFromContainer(
     const FlowerImageContainer& images,
-    SIFTExtractor& sift_extractor,
+    ORBExtractor& orb_extractor,
     std::map<FlowerType, std::vector<cv::Mat>>& temp_descriptors
 );
 
 // Combine descriptors from multiple images of the same class into a single matrix
-void combineSIFTDescriptors(
+void combineORBDescriptors(
     const std::map<FlowerType, std::vector<cv::Mat>>& temp_descriptors,
     std::map<FlowerType, cv::Mat>& train_descriptors,
     const std::vector<std::string>& class_names
 );
 
-// Train SIFT on healthy and optionally diseased images
-void trainSIFT(
+// Train ORB on healthy and optionally diseased images
+void trainORB(
     const FlowerImageContainer& train_healthy,
     const FlowerImageContainer& train_diseased,
-    SIFTExtractor& sift_extractor,
+    ORBExtractor& orb_extractor,
     std::map<FlowerType, cv::Mat>& train_descriptors,
     const std::vector<std::string>& class_names,
     bool use_diseased = true
 );
 
-// Test SIFT on test images and update metrics
-void testSIFT(
+// Test ORB on test images and update metrics
+void testORB(
     const FlowerImageContainer& test_images,
     const std::map<FlowerType, cv::Mat>& train_descriptors,
-    SIFTExtractor& sift_extractor,
+    ORBExtractor& orb_extractor,
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
@@ -52,12 +52,12 @@ void testSIFT(
     bool verbose = true
 );
 
-// Wrapper function to run the entire SIFT pipeline (training + testing)
-void sift(
+// Wrapper function to run the entire ORB pipeline (training + testing)
+void orb(
     const FlowerImageContainer& test_images,
     const FlowerImageContainer& train_healthy,
     const FlowerImageContainer& train_diseased,
     const std::string& output_dir
 );
 
-#endif // SIFT_PROCESSING_H
+#endif // ORB_PROCESSING_H

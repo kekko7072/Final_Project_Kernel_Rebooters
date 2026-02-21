@@ -1,8 +1,6 @@
 // Author: Marco Carraro
 
-#ifdef ENABLE_SURF
-
-#include "surf_processing.h"
+#include "orb_processing.h"
 #include "print_stats.h"
 #include <iostream>
 #include <chrono>
@@ -12,9 +10,9 @@ namespace fs = std::filesystem;
 using std::cout;
 using std::endl;
 
-void extractSURFFeaturesFromContainer(
+void extractORBFeaturesFromContainer(
     const FlowerImageContainer& images,
-    SURFExtractor& surf_extractor,
+    ORBExtractor& orb_extractor,
     std::map<FlowerType, std::vector<cv::Mat>>& temp_descriptors)
 {
     for (size_t i = 0; i < images.size(); i++) {
@@ -23,7 +21,7 @@ void extractSURFFeaturesFromContainer(
         std::vector<cv::KeyPoint> keypoints;
         cv::Mat descriptors;
         
-        surf_extractor.extract(img.getImageGrayscale(), keypoints, descriptors);
+        orb_extractor.extract(img.getImageGrayscale(), keypoints, descriptors);
         
         if (!descriptors.empty()) {
             temp_descriptors[img.flowerType()].push_back(descriptors);
@@ -31,7 +29,7 @@ void extractSURFFeaturesFromContainer(
     }
 }
 
-void combineSURFDescriptors(
+void combineORBDescriptors(
     const std::map<FlowerType, std::vector<cv::Mat>>& temp_descriptors,
     std::map<FlowerType, cv::Mat>& train_descriptors,
     const std::vector<std::string>& class_names)
@@ -56,44 +54,41 @@ void combineSURFDescriptors(
     }
 }
 
-void trainSURF(
+void trainORB(
     const FlowerImageContainer& train_healthy,
     const FlowerImageContainer& train_diseased,
-    SURFExtractor& surf_extractor,
+    ORBExtractor& orb_extractor,
     std::map<FlowerType, cv::Mat>& train_descriptors,
     const std::vector<std::string>& class_names,
     bool use_diseased)
 {
-    cout << "\nSURF Training:" << endl;
-    cout << "Extracting SURF features from training images..." << endl;
+    cout << "\nORB Training:" << endl;
+    cout << "Extracting ORB features from training images..." << endl;
     
     std::map<FlowerType, std::vector<cv::Mat>> temp_descriptors;
     
-    // Extract from healthy
     cout << "Processing healthy images..." << endl;
-    extractSURFFeaturesFromContainer(train_healthy, surf_extractor, temp_descriptors);
+    extractORBFeaturesFromContainer(train_healthy, orb_extractor, temp_descriptors);
     
-    // Extract from diseased (optional)
     if (use_diseased) {
         cout << "Processing diseased images..." << endl;
-        extractSURFFeaturesFromContainer(train_diseased, surf_extractor, temp_descriptors);
+        extractORBFeaturesFromContainer(train_diseased, orb_extractor, temp_descriptors);
     }
     
-    // Combine descriptors
-    combineSURFDescriptors(temp_descriptors, train_descriptors, class_names);
+    combineORBDescriptors(temp_descriptors, train_descriptors, class_names);
 }
 
-void testSURF(
+void testORB(
     const FlowerImageContainer& test_images,
     const std::map<FlowerType, cv::Mat>& train_descriptors,
-    SURFExtractor& surf_extractor,
+    ORBExtractor& orb_extractor,
     Metrics& metrics,
     const std::vector<std::string>& class_names,
     double threshold,
     ClassificationRecap* records,
     bool verbose)
 {
-    cout << "\nSURF Testing:" << endl;
+    cout << "\nORB Testing:" << endl;
     cout << "Threshold: " << threshold << endl;
     cout << "Testing on " << test_images.size() << " images..." << endl;
     
@@ -106,9 +101,8 @@ void testSURF(
         // Start timing
         auto start_time = std::chrono::high_resolution_clock::now();
         
-        // Extract features
-        surf_extractor.extract(test_img.getImageGrayscale(), 
-                              test_keypoints, test_descriptors);
+        // Extract ORB features from the test image
+        orb_extractor.extract(test_img.getImageGrayscale(), test_keypoints, test_descriptors);
         
         if (test_descriptors.empty()) {
             if (verbose) {
@@ -117,14 +111,13 @@ void testSURF(
             continue;
         }
         
-        // Find best match
+        // Find best matching class
         FlowerType predicted_type = FlowerType::NoFlower;
         int max_matches = 0;
         
         for (const auto& [flower_type, train_desc] : train_descriptors) {
             std::vector<cv::DMatch> good_matches;
-            surf_extractor.matchAndFilter(test_descriptors, train_desc, 
-                                         good_matches, threshold);
+            orb_extractor.matchAndFilter(test_descriptors, train_desc, good_matches, threshold);
             
             if (static_cast<int>(good_matches.size()) > max_matches) {
                 max_matches = static_cast<int>(good_matches.size());
@@ -134,8 +127,7 @@ void testSURF(
         
         // End timing
         auto end_time = std::chrono::high_resolution_clock::now();
-        double total_time = std::chrono::duration<double, std::milli>(
-            end_time - start_time).count();
+        double total_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
         
         // Update metrics
         int true_class = static_cast<int>(test_img.flowerType());
@@ -145,9 +137,9 @@ void testSURF(
         addProcessingTime(metrics, total_time);
 
         ClassificationRecord record = {
-            test_img.name(),                    
-            class_names[true_class],            
-            class_names[predicted_class]        
+            test_img.name(),                   
+            class_names[true_class],           
+            class_names[predicted_class]       
         };
         records->push_back(record);
         
@@ -161,31 +153,28 @@ void testSURF(
     }
 }
 
-void surf(const FlowerImageContainer& test_images,
-          const FlowerImageContainer& train_healthy,
-          const FlowerImageContainer& train_diseased,
-          const std::string& output_dir)
+void orb(const FlowerImageContainer& test_images,
+         const FlowerImageContainer& train_healthy,
+         const FlowerImageContainer& train_diseased,
+         const std::string& output_dir)
 {
     cout << "\n\n====================\n" << endl;
 
-    SURFExtractor surf;
-    Metrics surf_metrics = createMetrics(6);
-    std::map<FlowerType, cv::Mat> surf_train_descriptors;
-    ClassificationRecap surf_records;
-
-    // Train SURF
-    trainSURF(train_healthy, train_diseased, surf, surf_train_descriptors, class_names, true);
+    ORBExtractor orb;  
+    Metrics orb_metrics = createMetrics(6);
+    std::map<FlowerType, cv::Mat> orb_train_descriptors;
+    ClassificationRecap orb_records;
     
-    // Test SURF
-    double surf_threshold = 1.8;  // Can be tuned (higher = more matches, lower = stricter)
-    testSURF(test_images, surf_train_descriptors, surf, surf_metrics, class_names, surf_threshold, &surf_records, true);
+    // Train ORB
+    trainORB(train_healthy, train_diseased, orb, orb_train_descriptors, class_names, true);
     
-    // Display results
-    printClassificationReport(surf_metrics, class_names, "SURF");
+    // Test ORB
+    double orb_threshold = 1.5;  // Can be tuned (higher = more matches, lower = stricter)
+    testORB(test_images, orb_train_descriptors, orb, orb_metrics, class_names, orb_threshold, &orb_records, true);
+    
+    printClassificationReport(orb_metrics, class_names, "ORB");
 
     // Save recap to file
-    fs::path output_path = fs::path(output_dir) / "surf_recap.txt";
-    saveClassificationRecap(surf_records, surf_metrics, class_names, "SURF", output_path.string());
+    fs::path output_path = fs::path(output_dir) / "orb_recap.txt";
+    saveClassificationRecap(orb_records, orb_metrics, class_names, "ORB", output_path.string());
 }
-
-#endif // ENABLE_SURF
