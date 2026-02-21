@@ -1,98 +1,98 @@
 SIFT - Classification Results
 
-Filename                True Class        Predicted Class   
----------------------------------------------------------------
-no_flower_test_1.jpeg   NoFlower          Tulip              X
-no_flower_test_3.jpg    NoFlower          Tulip              X
-no_flower_test_2.jpg    NoFlower          Sunflower          X
-no_flower_test_4.jpg    NoFlower          Daisy              X
-tulip_test_3.jpg        Tulip             Tulip              V
-tulip_test_1.jpg        Tulip             Sunflower          X
-tulip_test_2.jpg        Tulip             Rose               X
-tulip_test_12.jpg       Tulip             Tulip              V
-tulip_test_10.jpg       Tulip             Sunflower          X
-tulip_test_5.jpeg       Tulip             Tulip              V
-tulip_test_9.jpg        Tulip             Dandelion          X
-tulip_test_7.jpg        Tulip             Tulip              V
-tulip_test_4.jpg        Tulip             Sunflower          X
-tulip_test_6.jpg        Tulip             Sunflower          X
-tulip_test_11.jpg       Tulip             Dandelion          X
-tulip_test_8.jpg        Tulip             Tulip              V
-roses_test_11.jpg       Rose              Rose               V
-roses_test_5.jpg        Rose              Dandelion          X
-roses_test_10.jpg       Rose              Tulip              X
-roses_test_8.jpg        Rose              Sunflower          X
-roses_test_3.jpg        Rose              Tulip              X
-roses_test_6.jpg        Rose              Rose               V
-roses_test_12.jpg       Rose              Dandelion          X
-roses_test_7.jpg        Rose              Tulip              X
-roses_test_2.jpg        Rose              Dandelion          X
-roses_test_9.webp       Rose              Dandelion          X
-roses_test_1.jpg        Rose              Dandelion          X
-roses_test_4.jpg        Rose              Tulip              X
-dandelion_test_11.jpg   Dandelion         Tulip              X
-dandelion_test_7.jpg    Dandelion         Tulip              X
-dandelion_test_3.jpg    Dandelion         Dandelion          V
-dandelion_test_12.jpg   Dandelion         Rose               X
-dandelion_test_2.jpg    Dandelion         Tulip              X
-dandelion_test_1.jpg    Dandelion         Tulip              X
-dandelion_test_9.jpeg   Dandelion         Tulip              X
-dandelion_test_4.jpg    Dandelion         Dandelion          V
-dandelion_test_10.jpeg  Dandelion         Dandelion          V
-dandelion_test_6.jpeg   Dandelion         Dandelion          V
-dandelion_test_8.jpg    Dandelion         Dandelion          V
-dandelion_test_5.jpg    Dandelion         Tulip              X
-sunflower_test_5.jpg    Sunflower         Dandelion          X
-sunflower_test_3.JPG    Sunflower         Tulip              X
-sunflower_test_8.webp   Sunflower         Rose               X
-sunflower_test_4.jpg    Sunflower         Dandelion          X
-sunflower_test_9.webp   Sunflower         Daisy              X
-sunflower_test_1.jpg    Sunflower         Daisy              X
-sunflower_test_12.webp  Sunflower         Tulip              X
-sunflower_test_6.jpg    Sunflower         Sunflower          V
-sunflower_test_11.webp  Sunflower         Dandelion          X
-sunflower_test_10.webp  Sunflower         Dandelion          X
-sunflower_test_7.webp   Sunflower         Sunflower          V
-sunflower_test_2.jpg    Sunflower         Dandelion          X
-daisy_test_10.jpg       Daisy             Sunflower          X
-daisy_test_3.jpg        Daisy             Dandelion          X
-daisy_test_2.jpg        Daisy             Sunflower          X
-daisy_test_4.jpg        Daisy             Daisy              V
-daisy_test_11.jpg       Daisy             Tulip              X
-daisy_test_7.jpg        Daisy             Sunflower          X
-daisy_test_1.jpg        Daisy             Tulip              X
-daisy_test_12.jpg       Daisy             Sunflower          X
-daisy_test_9.jpg        Daisy             Tulip              X
-daisy_test_6.jpg        Daisy             Sunflower          X
-daisy_test_5.jpg        Daisy             Sunflower          X
-daisy_test_8.jpg        Daisy             Sunflower          X
----------------------------------------------------------------
+Filename              True Class        Predicted Class   
+-------------------------------------------------------------
+no_flower_test_1      NoFlower          Sunflower          X
+no_flower_test_3      NoFlower          Tulip              X
+no_flower_test_2      NoFlower          Sunflower          X
+no_flower_test_4      NoFlower          Daisy              X
+tulip_test_3          Tulip             Daisy              X
+tulip_test_1          Tulip             Sunflower          X
+tulip_test_2          Tulip             Daisy              X
+tulip_test_12         Tulip             Tulip              V
+tulip_test_10         Tulip             Sunflower          X
+tulip_test_5          Tulip             Tulip              V
+tulip_test_9          Tulip             Dandelion          X
+tulip_test_7          Tulip             Tulip              V
+tulip_test_4          Tulip             Sunflower          X
+tulip_test_6          Tulip             Sunflower          X
+tulip_test_11         Tulip             Dandelion          X
+tulip_test_8          Tulip             Dandelion          X
+roses_test_11         Rose              Tulip              X
+roses_test_5          Rose              Sunflower          X
+roses_test_10         Rose              Tulip              X
+roses_test_8          Rose              Sunflower          X
+roses_test_3          Rose              Tulip              X
+roses_test_6          Rose              Rose               V
+roses_test_12         Rose              Dandelion          X
+roses_test_7          Rose              Tulip              X
+roses_test_2          Rose              Dandelion          X
+roses_test_9          Rose              Dandelion          X
+roses_test_1          Rose              Dandelion          X
+roses_test_4          Rose              Tulip              X
+dandelion_test_11     Dandelion         Tulip              X
+dandelion_test_7      Dandelion         Tulip              X
+dandelion_test_3      Dandelion         Dandelion          V
+dandelion_test_12     Dandelion         Rose               X
+dandelion_test_2      Dandelion         Tulip              X
+dandelion_test_1      Dandelion         Tulip              X
+dandelion_test_9      Dandelion         Tulip              X
+dandelion_test_4      Dandelion         Dandelion          V
+dandelion_test_10     Dandelion         Dandelion          V
+dandelion_test_6      Dandelion         Dandelion          V
+dandelion_test_8      Dandelion         Dandelion          V
+dandelion_test_5      Dandelion         Tulip              X
+sunflower_test_5      Sunflower         Dandelion          X
+sunflower_test_3      Sunflower         Tulip              X
+sunflower_test_8      Sunflower         Rose               X
+sunflower_test_4      Sunflower         Sunflower          V
+sunflower_test_9      Sunflower         Daisy              X
+sunflower_test_1      Sunflower         Tulip              X
+sunflower_test_12     Sunflower         Tulip              X
+sunflower_test_6      Sunflower         Sunflower          V
+sunflower_test_11     Sunflower         Dandelion          X
+sunflower_test_10     Sunflower         Dandelion          X
+sunflower_test_7      Sunflower         Sunflower          V
+sunflower_test_2      Sunflower         Dandelion          X
+daisy_test_10         Daisy             Sunflower          X
+daisy_test_3          Daisy             Daisy              V
+daisy_test_2          Daisy             Sunflower          X
+daisy_test_4          Daisy             Daisy              V
+daisy_test_11         Daisy             Tulip              X
+daisy_test_7          Daisy             Sunflower          X
+daisy_test_1          Daisy             Tulip              X
+daisy_test_12         Daisy             Sunflower          X
+daisy_test_9          Daisy             Tulip              X
+daisy_test_6          Daisy             Sunflower          X
+daisy_test_5          Daisy             Sunflower          X
+daisy_test_8          Daisy             Sunflower          X
+-------------------------------------------------------------
 
 Summary:
 Total samples:     64
-Correct:           15
-Overall Accuracy:  23.44%
-Total time:        301469.66
+Correct:           14
+Overall Accuracy:  21.88%
+Total time:        354180.99
 
 Processing Time Statistics (ms)
-Mean time:         4710.46
-Min time:          3021.91
-Max time:          15352.90
-Total time:        301469.66
+Mean time:         5534.08
+Min time:          3041.89
+Max time:          25021.78
+Total time:        354180.99
 
 Per-class Accuracy:
-Daisy:             8.33%
+Daisy:             16.67%
 Dandelion:         41.67%
-Rose:              16.67%
-Sunflower:         16.67%
-Tulip:             41.67%
+Rose:              8.33%
+Sunflower:         25.00%
+Tulip:             25.00%
 NoFlower:          0.00%
 
 Confusion Matrix:
             Daisy       Dandelion   Rose        Sunflower   Tulip       NoFlower    
-Daisy       1           1           0           7           3           0           
+Daisy       2           0           0           7           3           0           
 Dandelion   0           5           1           0           6           0           
-Rose        0           5           2           1           4           0           
-Sunflower   2           5           1           2           2           0           
-Tulip       0           2           1           4           5           0           
-NoFlower    1           0           0           1           2           0           
+Rose        0           4           1           2           5           0           
+Sunflower   1           4           1           3           3           0           
+Tulip       2           3           0           4           3           0           
+NoFlower    1           0           0           2           1           0           

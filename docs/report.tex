@@ -154,8 +154,12 @@
 	\end{itemize}
 
 	The final configuration selected for the evaluation phase was FLANN-based matching with a distance 
-	threshold of 2.0 and no limit on the number of training descriptors, as this provided the best overall 
+	threshold of 1.7 (better in vlab simulation) and no limit on the number of training descriptors, as this provided the best overall 
 	accuracy while maintaining reasonable processing time.
+
+	In the table below (see Table \ref{tab:SIFT_results}), the results of the different tested configurations 
+	are reported, showing the impact of each parameter choice on both accuracy and processing time. 
+	Those tests has been performed on pc, not on vlab.
 	
 	\begin{table}[H]
 		\centering
@@ -495,10 +499,10 @@
 	\begin{itemize}
 		\item \texttt{metrics.h/cpp} (\texttt{include/metrics.h}, \texttt{src/metrics.cpp}) for 
 		core data structures and computation functions.
-		\item \texttt{print\_stats.h/cpp} (\texttt{include/print\_stats.h}, \texttt{src/print\_stats.cpp}) 
-		for formatted output and reporting.
 		\item \texttt{Metrics} struct as the central data container, passed by reference throughout 
 		the pipeline.
+		\item \texttt{print\_stats.h/cpp} (\texttt{include/print\_stats.h}, \texttt{src/print\_stats.cpp}) 
+		for formatted output and reporting.
 	\end{itemize}
 
 	This separation permits modular development: \texttt{metrics.cpp} handles numerical computations 
@@ -526,6 +530,24 @@
 		\item \textbf{Counts vs rates}: Raw counts (\texttt{correct\_predictions}, \texttt{total\_samples}) 
 		are stored; accuracy is computed on-demand to avoid synchronization issues during incremental updates.
 	\end{itemize}
+
+	\subsection{Classification Record System}
+	To support detailed analysis of individual predictions, a parallel tracking system was implemented:
+
+	\begin{verbatim}
+	using ClassificationRecord = std::array<std::string, 3>;
+	using ClassificationRecap = std::vector<ClassificationRecord>;
+	\end{verbatim}
+
+	\noindent Each \texttt{ClassificationRecord} contains:
+	\begin{enumerate}
+		\item \textbf{Filename}: Original test image filename for traceability
+		\item \textbf{True class}: Ground truth label from dataset
+		\item \textbf{Predicted class}: Algorithm's classification output
+	\end{enumerate}
+
+	This structure enables post processing analysis of misclassified images, identification of systematic 
+	error patterns and comparison between algorithms behavior.
 
 	\subsection{Accuracy Computation}
 	Multiple accuracy metrics are supported:
@@ -566,21 +588,39 @@
 	\subsection{Reporting Functions}
 	The \texttt{print\_stats} module provides hierarchical reporting:
 
-	\textbf{Component functions:}
+	\noindent\textbf{Component functions:}
 	\begin{itemize}
 		\item \texttt{printConfusionMatrix(...)}: Formatted confusion matrix table.
 		\item \texttt{printTimingStats(...)}: Processing time summary.
 		\item \texttt{printPerClassAccuracy(...)}: Per-class accuracy breakdown.
 	\end{itemize}
 
-	\textbf{Composite function:}
+	\noindent\textbf{Composite function:}
 	\begin{itemize}
 		\item \texttt{printClassificationReport(...)}: Combines all three components into a comprehensive 
 		summary with optional algorithm name header.
 	\end{itemize}
 
-	This modular structure allows flexible reporting: debugging sessions might print only timing stats, 
+	This modular structure allows flexible reporting: debugging sessions might print only timing stats 
 	while final evaluation uses the full classification report.
+
+	\subsection{File Export System}
+	The metrics system includes comprehensive file export functionality for persistent storage and offline 
+	analysis.
+	\noindent The \texttt{saveClassificationRecap} function generates a detailed text report for a single algorithm containing:
+
+	\begin{itemize}
+		\item \textbf{Per-image classification table}: Lists every test image with its true label, 
+		predicted label, and correctness indicator (V/X)
+		\item \textbf{Summary statistics}: Total samples, correct predictions, overall accuracy
+		\item \textbf{Timing analysis}: Mean, min, max, and total processing times
+		\item \textbf{Per-class accuracy}: Accuracy percentage for each flower class
+		\item \textbf{Confusion matrix}: Full confusion matrix for detailed error analysis
+	\end{itemize}
+
+	This comprehensive export ensures that all experimental results are preserved for later analysis and 
+	comparison between algorithms.
+
 
 	\subsection{Design Patterns}
 	Several design patterns enhance usability:
@@ -604,8 +644,8 @@
 		functions.
 		\item New output formats: Add new functions to \texttt{print\_stats.cpp} or create separate 
 		modules.
-		\item Statistical tests: Raw data in \texttt{processing\_times} vector enables computation 
-		of variance, standard deviation, percentiles, or hypothesis tests.
+		\item Comparative analysis: Multiple algorithm results can be combined for side-by-side comparison 
+		and statistical significance testing.
 	\end{itemize}
 
 	\subsection{Performance Considerations}
@@ -613,18 +653,21 @@
 	\begin{itemize}
 		\item Per-prediction update: \(O(1)\) for counter increments and confusion matrix access.
 		\item Time recording: \(O(1)\) vector push\_back operation.
-		\item Accuracy computation: \(O(c^2)\) where \(c\) is number of classes, negligible compared to feature extraction time.
+		\item Accuracy computation: \(O(c^2)\) where \(c\) is number of classes, negligible compared to 
+		feature extraction time.
 	\end{itemize}
 
 	\subsection{Integration with Feature Extractors}
-	All feature extraction modules (SIFT, SURF, TM, HOG, BoW) use this common metrics infrastructure, ensuring:
+	All feature extraction modules (SIFT, SURF, ORB, TM, HOG, BoW) use this common metrics infrastructure, 
+	ensuring:
 	\begin{itemize}
 		\item Consistent evaluation methodology across algorithms.
 		\item Comparable timing measurements (all include feature extraction through final prediction).
 		\item Uniform reporting format for easy comparison.
 	\end{itemize}
 
-	This standardization is critical for fair performance comparisons and for making informed decisions about which algorithm is best suited for the flower classification task.
+	This standardization is critical for fair performance comparisons and for making informed decisions 
+	about which algorithm is best suited for the flower classification task.
 
 	\section{Flower Health Detection}
 	\textit{Section reserved for flower health detection details (to be completed).}
@@ -656,7 +699,7 @@
 	\toprule
 	\textbf{Hours worked} & \textbf{Marco Carraro} & \textbf{Luca Pellegrini} & \textbf{Francesco Vezzani} \\ 
 	\midrule
-	\textbf{Total} & \textbf{$\sim$ 40} & \textbf{XX} & \textbf{XX} \\
+	\textbf{Total} & \textbf{$\sim$40} & \textbf{XX} & \textbf{XX} \\
 	\bottomrule
 	\end{tabular}
 	\caption{Approximate hours worked per team member}

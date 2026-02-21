@@ -127,6 +127,9 @@ int main(int argc, char *argv[])
 
     if (!fs::exists(output_dir)) {
         fs::create_directory(output_dir);
+        cout << "Created output directory: " << output_dir.string() << endl;
+    } else {
+        cout << "Output directory already exists: " << output_dir.string() << endl;
     }
 
 

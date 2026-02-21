@@ -51,7 +51,7 @@ void combineSURFDescriptors(
         train_descriptors[flower_type] = combined;
         
         int idx = static_cast<int>(flower_type);
-        cout << "  " << class_names[idx] 
+        cout << class_names[idx] 
              << ": " << combined.rows << " descriptors" << endl;
     }
 }

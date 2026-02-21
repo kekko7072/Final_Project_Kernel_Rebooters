@@ -171,7 +171,7 @@ void sift(
     trainSIFT(train_healthy, train_diseased, sift, sift_train_descriptors, class_names, true);
     
     // Test SIFT
-    double sift_threshold = 2.0;  // Can be tuned (higher = more matches, lower = stricter)
+    double sift_threshold = 1.7;  // Can be tuned (higher = more matches, lower = stricter)
     testSIFT(test_images, sift_train_descriptors, sift, sift_metrics, class_names, sift_threshold, &sift_records, true);
     
     // Display results

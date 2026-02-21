@@ -106,7 +106,6 @@ void saveClassificationRecap(
     outfile << std::string(max_filename_len + 41, '-') << std::endl;
     
     // Table rows
-    int correct = 0;
     for (const auto& record : records) {
         outfile << std::setw(max_filename_len + 2) << record[0]
                 << std::setw(18) << record[1]
@@ -115,7 +114,6 @@ void saveClassificationRecap(
         // Indicate correctness
         if (record[1] == record[2]) {
             outfile << " V";
-            correct++;
         } else {
             outfile << " X";
         }
@@ -127,7 +125,7 @@ void saveClassificationRecap(
     outfile << std::endl;
     outfile << "Summary:" << std::endl;
     outfile << "Total samples:     " << metrics.total_samples << std::endl;
-    outfile << "Correct:           " << correct << std::endl;
+    outfile << "Correct:           " << metrics.correct_predictions << std::endl;
     outfile << "Overall Accuracy:  " << std::fixed << std::setprecision(2)
                                      << totalAccuracy(metrics) * 100.0 << "%" << std::endl;
     outfile << "Total time:        " << totalProcessingTime(metrics) << std::endl;
