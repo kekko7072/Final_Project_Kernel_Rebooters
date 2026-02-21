@@ -33,3 +33,12 @@ cmake --build build -j4
 ```bash
 ./build/flower_classifier Final_project_proposal
 ```
+
+## Classification results
+Classification results from our test runs can be found under the `results` directory.
+
+## Recompile PDF report
+If you need to recompile the PDF report from the LaTeX source file, run `make` inside the `docs` folder:
+```bash
+cd docs/; make
+```
